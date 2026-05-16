@@ -1,0 +1,69 @@
+<div class="login-page">
+  <div class="glow glow-top"></div>
+  <div class="glow glow-bottom"></div>
+
+  <main class="login-card">
+    <!-- Panel izquierdo -->
+    <aside class="login-aside">
+      <div class="aside-overlay-color"></div>
+      <div class="aside-overlay-fade"></div>
+      <img src="https://www.styleiconcolombia.com/wp-content/uploads/2025/11/Set-de-Tigres.jpg" alt="" class="aside-image" />
+
+      <div class="aside-top">
+        <div class="aside-badge">
+          <div class="aside-dot"></div>
+        </div>
+      </div>
+
+      <div class="aside-bottom">
+        <p class="aside-quote">
+          "Tu próximo outfit favorito te está esperando"
+        </p>
+        <div class="aside-author">
+          <div class="aside-line"></div>
+          <p>SmartCart</p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Formulario -->
+    <section class="login-form-panel">
+      <div class="top-divider"></div>
+
+      <header class="form-header">
+        <h1>Crea tu cuenta</h1>
+        <p>Regístrate y empieza a descubrir las mejores prendas</p>
+      </header>
+
+      <form class="login-form" (ngSubmit)="onRegister()">
+        <div class="field">
+          <label for="nombre">Nombre</label>
+          <input id="nombre" type="text" placeholder="Tu nombre" [(ngModel)]="nombre" name="nombre" />
+        </div>
+
+        <div class="field">
+          <label for="email">Correo electrónico</label>
+          <input id="email" type="email" placeholder="tu@correo.com" [(ngModel)]="email" name="email" />
+        </div>
+
+        <div class="field">
+          <label for="password">Contraseña</label>
+          <input id="password" type="password" placeholder="••••••••••••" class="password-input" [(ngModel)]="password" name="password" />
+        </div>
+
+        <p class="error-msg" *ngIf="error">{{ error }}</p>
+
+        <div class="actions">
+          <button type="submit" class="btn-primary">Registrarse</button>
+        </div>
+      </form>
+
+      <footer class="form-footer">
+        <p>
+          ¿Ya tienes cuenta?
+          <a routerLink="/login">Inicia sesión aquí</a>
+        </p>
+      </footer>
+    </section>
+  </main>
+</div>

@@ -1,0 +1,93 @@
+:host {
+  --dusk: oklch(0.16 0.012 40);
+  --clay-base: oklch(0.20 0.014 40);
+  --clay-raised: oklch(0.30 0.016 40);
+  --terra: oklch(0.62 0.13 45);
+  --sand: oklch(0.92 0.012 70);
+  --sand-dim: oklch(0.72 0.014 70);
+}
+
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  background-color: var(--clay-base);
+  color: var(--sand);
+  border-bottom: 1px solid var(--clay-raised);
+  font-family: 'Manrope', sans-serif;
+}
+
+.logo {
+  font-family: 'Newsreader', serif;
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--sand);
+}
+
+ul {
+  display: flex;
+  gap: 1.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+li {
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: var(--sand-dim);
+  transition: color 0.2s;
+}
+
+li:hover {
+  color: var(--terra);
+}
+
+.account {
+  position: relative;
+  cursor: pointer;
+  color: var(--sand);
+  display: flex;
+  align-items: center;
+}
+
+.account svg {
+  transition: color 0.2s;
+}
+
+.account:hover svg {
+  color: var(--terra);
+}
+
+.dropdown {
+  position: absolute;
+  top: 2.5rem;
+  right: 0;
+  background: var(--clay-base);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  min-width: 180px;
+  z-index: 999;
+  border: 1px solid var(--clay-raised);
+}
+
+.dropdown a {
+  display: block;
+  padding: 0.9rem 1.2rem;
+  color: var(--sand);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.dropdown a:hover {
+  background: var(--terra);
+  color: var(--sand);
+}

@@ -1,0 +1,21 @@
+<nav>
+  <div class="logo">SmartCart</div>
+  <ul>
+    <li (click)="mostrarTodos()">Todos</li>
+    <li *ngFor="let cat of categorias" (click)="filtrar(cat.nombre)">
+      {{ cat.nombre }}
+    </li>
+  </ul>
+
+  <div class="account" (click)="toggleMenu()">
+    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="8" r="4"/>
+      <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+    </svg>
+
+    <div class="dropdown" *ngIf="menuAbierto">
+      <a routerLink="/login">Iniciar sesión</a>
+      <a routerLink="/registro">Crear cuenta</a>
+    </div>
+  </div>
+</nav>

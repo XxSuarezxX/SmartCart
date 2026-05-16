@@ -1,0 +1,92 @@
+:host {
+  --dusk: oklch(0.16 0.012 40);
+  --clay-base: oklch(0.20 0.014 40);
+  --clay-surface: oklch(0.24 0.014 40);
+  --clay-raised: oklch(0.30 0.016 40);
+  --terra: oklch(0.62 0.13 45);
+  --terra-dim: oklch(0.55 0.12 45);
+  --sand: oklch(0.92 0.012 70);
+  --sand-dim: oklch(0.72 0.014 70);
+}
+
+.home-container {
+  padding: 2rem;
+  padding-top: 5rem;
+  background-color: var(--dusk);
+  min-height: 100vh;
+  font-family: 'Manrope', sans-serif;
+}
+
+.titulo {
+  font-family: 'Newsreader', serif;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  color: var(--sand);
+  font-weight: 500;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.card {
+  background: var(--clay-base);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  transition: transform 0.2s;
+  border: 1px solid var(--clay-raised);
+}
+
+.card:hover {
+  transform: translateY(-4px);
+}
+
+.card img {
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+}
+
+.info {
+  padding: 1rem;
+}
+
+.info h3 {
+  margin: 0 0 0.3rem;
+  font-size: 1rem;
+  color: var(--sand);
+}
+
+.categoria {
+  font-size: 0.8rem;
+  color: var(--sand-dim);
+  margin: 0 0 0.5rem;
+}
+
+.precio {
+  font-weight: bold;
+  color: var(--terra);
+  margin: 0 0 1rem;
+}
+
+button {
+  width: 100%;
+  padding: 0.6rem;
+  background-color: var(--clay-surface);
+  color: var(--sand);
+  border: 1px solid var(--clay-raised);
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+button:hover {
+  background-color: var(--terra);
+  color: var(--sand);
+  border-color: var(--terra);
+}

@@ -1,0 +1,48 @@
+<div class="admin-container">
+  <header class="admin-header">
+    <h1>Panel Admin</h1>
+    <button class="btn-logout" (click)="logout()">Cerrar sesión</button>
+  </header>
+
+  <div class="admin-content">
+    <div class="form-card">
+      <h2>Crear nuevo producto</h2>
+
+      <p class="msg-exito" *ngIf="exito">{{ exito }}</p>
+      <p class="msg-error" *ngIf="error">{{ error }}</p>
+
+      <div class="field">
+        <label>Nombre</label>
+        <input type="text" placeholder="Nombre del producto" [(ngModel)]="producto.nombre" />
+      </div>
+
+      <div class="field">
+        <label>Descripción</label>
+        <textarea placeholder="Descripción del producto" [(ngModel)]="producto.descripcion"></textarea>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label>Precio</label>
+          <input type="number" placeholder="45000" [(ngModel)]="producto.precio" />
+        </div>
+        <div class="field">
+          <label>Stock</label>
+          <input type="number" placeholder="10" [(ngModel)]="producto.stock" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label>URL de imagen</label>
+        <input type="text" placeholder="https://..." [(ngModel)]="producto.url_imagen" />
+      </div>
+
+      <div class="field">
+        <label>Categoría</label>
+        <input type="text" placeholder="Oversize, Hoodies, New Era..." [(ngModel)]="producto.categoria.nombre" />
+      </div>
+
+      <button class="btn-crear" (click)="crearProducto()">Crear producto</button>
+    </div>
+  </div>
+</div>

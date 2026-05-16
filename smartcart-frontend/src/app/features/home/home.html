@@ -1,0 +1,14 @@
+<div class="home-container">
+  <h2 class="titulo">Nueva Colección</h2>
+  <div class="grid">
+    <div class="card" *ngFor="let p of productosFiltrados">
+      <img [src]="p.url_imagen" [alt]="p.nombre" onerror="this.src='https://placehold.co/300x400?text=Sin+imagen'">
+      <div class="info">
+        <h3>{{ p.nombre }}</h3>
+        <p class="categoria">{{ p.categoria?.nombre }}</p>
+        <p class="precio">${{ p.precio }}</p>
+        <button>Agregar al carrito</button>
+      </div>
+    </div>
+  </div>
+</div>

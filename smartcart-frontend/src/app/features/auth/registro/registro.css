@@ -1,0 +1,381 @@
+:host {
+    display: block;
+    width: 100%;
+    min-height: 100dvh;
+    --dusk: oklch(0.16 0.012 40);
+    --clay-base: oklch(0.20 0.014 40);
+    --clay-surface: oklch(0.24 0.014 40);
+    --clay-raised: oklch(0.30 0.016 40);
+    --terra: oklch(0.62 0.13 45);
+    --terra-dim: oklch(0.55 0.12 45);
+    --sand: oklch(0.92 0.012 70);
+    --sand-dim: oklch(0.72 0.014 70);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+.login-page {
+    min-height: 100dvh;
+    background: var(--dusk);
+    color: var(--sand);
+    font-family: 'Manrope', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Resplandores de fondo */
+.glow {
+    position: absolute;
+    border-radius: 9999px;
+    pointer-events: none;
+}
+
+.glow-top {
+    top: -10%;
+    right: -5%;
+    width: 800px;
+    height: 800px;
+    background: color-mix(in oklab, var(--terra) 15%, transparent);
+    filter: blur(140px);
+    mix-blend-mode: screen;
+}
+
+.glow-bottom {
+    bottom: -20%;
+    left: -10%;
+    width: 600px;
+    height: 600px;
+    background: color-mix(in oklab, var(--clay-raised) 40%, transparent);
+    filter: blur(100px);
+}
+
+/* Tarjeta principal */
+.login-card {
+    width: 100%;
+    max-width: 1080px;
+    background: var(--clay-base);
+    border-radius: 2.5rem;
+    box-shadow: 0 32px 80px -16px rgba(0, 0, 0, 0.8),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+    display: flex;
+    overflow: hidden;
+    position: relative;
+    z-index: 10;
+}
+
+/* Panel lateral */
+.login-aside {
+    display: none;
+    width: 45%;
+    position: relative;
+    background: var(--clay-surface);
+    padding: 3rem;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+@media (min-width: 1024px) {
+    .login-aside {
+        display: flex;
+    }
+}
+
+.aside-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.4;
+    mix-blend-mode: luminosity;
+    transform: scale(1.05);
+}
+
+.aside-overlay-color {
+    position: absolute;
+    inset: 0;
+    background: color-mix(in oklab, var(--terra) 10%, transparent);
+    mix-blend-mode: color;
+    z-index: 10;
+}
+
+.aside-overlay-fade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom,
+            color-mix(in oklab, var(--clay-base) 40%, transparent),
+            transparent,
+            color-mix(in oklab, var(--clay-base) 90%, transparent));
+    z-index: 20;
+}
+
+.aside-top,
+.aside-bottom {
+    position: relative;
+    z-index: 30;
+}
+
+
+.aside-quote {
+    font-family: 'Newsreader', serif;
+    font-size: 1.875rem;
+    line-height: 1.15;
+    margin: 0 0 1.5rem;
+}
+
+.aside-author {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.aside-line {
+    height: 1px;
+    width: 2rem;
+    background: color-mix(in oklab, var(--terra) 50%, transparent);
+}
+
+.aside-author p {
+    font-size: 0.75rem;
+    color: var(--sand-dim);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin: 0;
+}
+
+/* Panel del formulario */
+.login-form-panel {
+    width: 100%;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    min-height: 600px;
+    position: relative;
+}
+
+@media (min-width: 640px) {
+    .login-form-panel {
+        padding: 3.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .login-form-panel {
+        width: 55%;
+        padding: 5rem;
+    }
+}
+
+.top-divider {
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent,
+            color-mix(in oklab, var(--sand) 5%, transparent), transparent);
+}
+
+.form-header {
+    margin-bottom: 3rem;
+}
+
+.form-header h1 {
+    font-family: 'Newsreader', serif;
+    font-size: 2.75rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin: 0 0 1rem;
+}
+
+.form-header p {
+    color: var(--sand-dim);
+    max-width: 40ch;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    flex-grow: 1;
+    max-width: 420px;
+    width: 100%;
+}
+
+.field label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--sand-dim);
+    margin-bottom: 0.625rem;
+    transition: color 0.2s;
+}
+
+.field:focus-within label {
+    color: var(--sand);
+}
+
+.field-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.625rem;
+}
+
+.field-label-row label {
+    margin-bottom: 0;
+}
+
+.link-muted {
+    font-size: 0.875rem;
+    color: var(--sand-dim);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.link-muted:hover {
+    color: var(--terra);
+}
+
+.field input {
+    width: 100%;
+    background: var(--clay-surface);
+    border: 1px solid var(--clay-raised);
+    border-radius: 1rem;
+    padding: 1rem 1.25rem;
+    color: var(--sand);
+    font-family: inherit;
+    font-size: 1rem;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.2);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.field input::placeholder {
+    color: color-mix(in oklab, var(--sand-dim) 40%, transparent);
+}
+
+.field input:focus {
+    outline: none;
+    border-color: var(--terra);
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.2), 0 0 0 1px var(--terra);
+}
+
+.password-input {
+    letter-spacing: 0.1em;
+    font-size: 1.125rem;
+}
+
+.actions {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.btn-primary {
+    width: 100%;
+    background: var(--terra);
+    color: var(--sand);
+    border: none;
+    padding: 1rem;
+    border-radius: 1rem;
+    font-family: inherit;
+    font-weight: 500;
+    font-size: 1rem;
+    letter-spacing: 0.025em;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 8px 20px -6px rgba(176, 93, 67, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.btn-primary:hover {
+    background: var(--terra-dim);
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px -6px rgba(176, 93, 67, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 0.5rem 0;
+}
+
+.divider-line {
+    height: 1px;
+    flex: 1;
+    background: var(--clay-raised);
+}
+
+.divider span {
+    font-size: 0.75rem;
+    color: var(--sand-dim);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.btn-secondary {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--clay-raised);
+    color: var(--sand);
+    padding: 1rem;
+    border-radius: 1rem;
+    font-family: inherit;
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn-secondary:hover {
+    background: var(--clay-surface);
+}
+
+.form-footer {
+    margin-top: 3rem;
+}
+
+.form-footer p {
+    color: var(--sand-dim);
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+.form-footer a {
+    color: var(--sand);
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-color: var(--clay-raised);
+    text-underline-offset: 4px;
+    transition: color 0.2s;
+}
+
+.form-footer a:hover {
+    color: var(--terra);
+}
+
+.error-msg {
+    color: var(--terra);
+    font-size: 0.875rem;
+    margin: 0;
+}
