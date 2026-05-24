@@ -1,0 +1,112 @@
+<div class="cuenta-page">
+    <aside class="cuenta-sidebar">
+        <div class="perfil-info">
+            <div class="avatar">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="1.5">
+                    <circle cx="12" cy="8" r="4" />
+                    <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+                </svg>
+            </div>
+            <div>
+                <p class="perfil-nombre">{{ username }}</p>
+                <p class="perfil-email">Cliente SmartCart</p>
+            </div>
+        </div>
+
+        <nav class="cuenta-nav">
+            <div class="nav-item" [class.active]="seccionActiva === 'compras'" (click)="setSeccion('compras')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <circle cx="9" cy="21" r="1" />
+                    <circle cx="20" cy="21" r="1" />
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                </svg>
+                Mis Compras
+            </div>
+            <div class="nav-item" [class.active]="seccionActiva === 'favoritos'" (click)="setSeccion('favoritos')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path
+                        d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                </svg>
+                Favoritos
+            </div>
+            <div class="nav-item" [class.active]="seccionActiva === 'perfil'" (click)="setSeccion('perfil')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="8" r="4" />
+                    <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+                </svg>
+                Perfil
+            </div>
+            <div class="nav-item logout" (click)="logout()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
+                Cerrar sesión
+            </div>
+        </nav>
+    </aside>
+
+    <main class="cuenta-main">
+
+        <!-- Mis Compras -->
+        <div *ngIf="seccionActiva === 'compras'">
+            <h2>Mis Compras Recientes</h2>
+            <div class="empty-state">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="1">
+                    <circle cx="9" cy="21" r="1" />
+                    <circle cx="20" cy="21" r="1" />
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                </svg>
+                <p>Aún no tienes compras</p>
+                <span>Cuando realices una compra aparecerá aquí</span>
+            </div>
+        </div>
+
+        <!-- Favoritos -->
+        <div *ngIf="seccionActiva === 'favoritos'">
+            <h2>Mis Favoritos</h2>
+            <div class="empty-state" *ngIf="favoritos.length === 0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="1">
+                    <path
+                        d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                </svg>
+                <p>Aún no tienes favoritos</p>
+                <span>Dale like a productos para guardarlos aquí</span>
+            </div>
+            <div class="grid" *ngIf="favoritos.length > 0">
+                <div class="card" *ngFor="let p of favoritos">
+                    <img [src]="p.url_imagen" [alt]="p.nombre"
+                        onerror="this.src='https://placehold.co/300x400?text=Sin+imagen'">
+                    <div class="info">
+                        <h3>{{ p.nombre }}</h3>
+                        <p class="precio">${{ p.precio }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Perfil -->
+        <div *ngIf="seccionActiva === 'perfil'">
+            <h2>Mi Perfil</h2>
+            <div class="perfil-card">
+                <div class="perfil-field">
+                    <label>Nombre</label>
+                    <p>{{ username }}</p>
+                </div>
+                <div class="perfil-field">
+                    <label>Rol</label>
+                    <p>{{ rol }}</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>

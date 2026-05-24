@@ -379,3 +379,22 @@
     font-size: 0.875rem;
     margin: 0;
 }
+
+.btn-back {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--sand-dim);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: color 0.2s;
+  z-index: 10;
+}
+
+.btn-back:hover {
+  color: var(--terra);
+}

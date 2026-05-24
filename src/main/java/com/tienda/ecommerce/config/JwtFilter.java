@@ -6,12 +6,13 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
@@ -33,11 +34,24 @@ public class JwtFilter extends OncePerRequestFilter {
 
             if (jwtUtil.esTokenValido(token)) {
                 String email = jwtUtil.extraerUsername(token);
-                // Creamos la autenticación en el contexto de Spring
+                String rol = jwtUtil.extraerRol(token);
+
+                System.out.println("=== JWT FILTER ===");
+                System.out.println("Email: " + email);
+                System.out.println("Rol extraido: " + rol);
+
+                List<SimpleGrantedAuthority> authorities = List.of(
+                        new SimpleGrantedAuthority(rol));
+
                 UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                        email, null, new ArrayList<>()
+                        email, null, authorities
+
                 );
                 SecurityContextHolder.getContext().setAuthentication(auth);
+                System.out.println("=== AUTHORITIES: " + authorities);
+                System.out.println("=== AUTH: " + auth.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(auth);
+                System.out.println("=== CONTEXT: " + SecurityContextHolder.getContext().getAuthentication());
             }
         }
 

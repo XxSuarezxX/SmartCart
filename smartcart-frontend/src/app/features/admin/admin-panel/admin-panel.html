@@ -1,48 +1,322 @@
-<div class="admin-container">
-  <header class="admin-header">
-    <h1>Panel Admin</h1>
-    <button class="btn-logout" (click)="logout()">Cerrar sesión</button>
-  </header>
+<div class="admin-page">
 
-  <div class="admin-content">
-    <div class="form-card">
-      <h2>Crear nuevo producto</h2>
+  <aside class="admin-sidebar">
+    <div class="sidebar-logo">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2">
+        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+        <line x1="3" y1="6" x2="21" y2="6" />
+        <path d="M16 10a4 4 0 0 1-8 0" />
+      </svg>
+      SmartCart
+    </div>
 
-      <p class="msg-exito" *ngIf="exito">{{ exito }}</p>
-      <p class="msg-error" *ngIf="error">{{ error }}</p>
-
-      <div class="field">
-        <label>Nombre</label>
-        <input type="text" placeholder="Nombre del producto" [(ngModel)]="producto.nombre" />
+    <div class="admin-info">
+      <div class="avatar">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="1.5">
+          <circle cx="12" cy="8" r="4" />
+          <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+        </svg>
       </div>
-
-      <div class="field">
-        <label>Descripción</label>
-        <textarea placeholder="Descripción del producto" [(ngModel)]="producto.descripcion"></textarea>
+      <div>
+        <p class="admin-nombre">{{ adminName }}</p>
+        <p class="admin-rol">Administrador</p>
       </div>
+    </div>
 
-      <div class="row">
-        <div class="field">
-          <label>Precio</label>
-          <input type="number" placeholder="45000" [(ngModel)]="producto.precio" />
+    <nav class="sidebar-nav">
+      <div class="nav-item" [class.active]="seccionActiva === 'dashboard'" (click)="setSeccion('dashboard')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7" />
+          <rect x="14" y="3" width="7" height="7" />
+          <rect x="14" y="14" width="7" height="7" />
+          <rect x="3" y="14" width="7" height="7" />
+        </svg>
+        Dashboard
+      </div>
+      <div class="nav-item" [class.active]="seccionActiva === 'productos'" (click)="setSeccion('productos')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2">
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+          <line x1="3" y1="6" x2="21" y2="6" />
+        </svg>
+        Productos
+      </div>
+      <div class="nav-item" [class.active]="seccionActiva === 'categorias'" (click)="setSeccion('categorias')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+        </svg>
+        Categorías
+      </div>
+      <div class="nav-item" [class.active]="seccionActiva === 'nuevo'" (click)="setSeccion('nuevo')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="16" />
+          <line x1="8" y1="12" x2="16" y2="12" />
+        </svg>
+        Nuevo Producto
+      </div>
+      <div class="nav-item logout" (click)="logout()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+          <polyline points="16 17 21 12 16 7" />
+          <line x1="21" y1="12" x2="9" y2="12" />
+        </svg>
+        Cerrar sesión
+      </div>
+    </nav>
+  </aside>
+
+  <main class="admin-main">
+
+    <!-- Dashboard -->
+    <div *ngIf="seccionActiva === 'dashboard'">
+      <h2>Dashboard</h2>
+      <div class="metricas-grid">
+        <div class="metrica-card">
+          <span class="metrica-label">Productos</span>
+          <span class="metrica-valor">{{ productos.length }}</span>
+          <span class="metrica-sub">En catálogo</span>
         </div>
-        <div class="field">
-          <label>Stock</label>
-          <input type="number" placeholder="10" [(ngModel)]="producto.stock" />
+        <div class="metrica-card">
+          <span class="metrica-label">Categorías</span>
+          <span class="metrica-valor">{{ categorias.length }}</span>
+          <span class="metrica-sub">Activas</span>
+        </div>
+        <div class="metrica-card">
+          <span class="metrica-label">Interacciones</span>
+          <span class="metrica-valor">{{ ranking.length }}</span>
+          <span class="metrica-sub">Total likes</span>
         </div>
       </div>
 
-      <div class="field">
-        <label>URL de imagen</label>
-        <input type="text" placeholder="https://..." [(ngModel)]="producto.url_imagen" />
+      <div class="ranking-section">
+        <h3>Productos Populares</h3>
+        <div class="ranking-empty" *ngIf="ranking.length === 0">
+          <p>Aún no hay datos de interacciones</p>
+        </div>
+        <div class="ranking-list" *ngIf="ranking.length > 0">
+          <div class="ranking-item" *ngFor="let item of ranking; let i = index">
+            <span class="ranking-pos">#{{ i + 1 }}</span>
+            <img [src]="item.url_imagen" [alt]="item.nombre" onerror="this.src='https://placehold.co/48x48?text=IMG'">
+            <div class="ranking-info">
+              <p>{{ item.nombre }}</p>
+              <span>{{ item.categoria?.nombre }}</span>
+            </div>
+            <span class="ranking-ventas">{{ item.puntos || 0 }} likes</span>
+          </div>
+        </div>
       </div>
+    </div>
 
-      <div class="field">
-        <label>Categoría</label>
-        <input type="text" placeholder="Oversize, Hoodies, New Era..." [(ngModel)]="producto.categoria.nombre" />
+    <!-- Inventario -->
+    <div *ngIf="seccionActiva === 'productos'">
+      <h2>Inventario</h2>
+      <div class="tabla-wrapper">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Categoría</th>
+              <th>Precio</th>
+              <th>Stock</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of productos">
+              <td>
+                <div class="tabla-producto">
+                  <img [src]="p.urlImagen" [alt]="p.nombre"
+                    onerror="this.src='https://placehold.co/300x400?text=Sin+imagen'">
+                  {{ p.nombre }}
+                </div>
+              </td>
+              <td>{{ p.categoria?.nombre }}</td>
+              <td>{{ p.precio | precio }}</td>
+              <td>{{ p.stock }}</td>
+              <td>
+                <div class="acciones">
+                  <button class="btn-editar" (click)="editarProducto(p)">Editar</button>
+                  <button class="btn-eliminar" (click)="eliminarProducto(p.id)">Eliminar</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
+    </div>
 
-      <button class="btn-crear" (click)="crearProducto()">Crear producto</button>
+    <!-- Categorías -->
+    <div *ngIf="seccionActiva === 'categorias'">
+      <h2>Categorías</h2>
+      <div class="form-card" style="margin-bottom: 2rem;">
+        <h3>Nueva Categoría</h3>
+        <p class="msg-exito" *ngIf="exitoCategoria">{{ exitoCategoria }}</p>
+        <p class="msg-error" *ngIf="errorCategoria">{{ errorCategoria }}</p>
+        <div class="field">
+          <label>Nombre</label>
+          <input type="text" placeholder="Nombre de la categoría" [(ngModel)]="nuevaCategoria.nombre" />
+        </div>
+        <button class="btn-crear" (click)="crearCategoria()">Crear Categoría</button>
+      </div>
+      <div class="tabla-wrapper">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let cat of categorias">
+              <td>{{ cat.id }}</td>
+              <td>{{ cat.nombre }}</td>
+              <td>
+                <button class="btn-eliminar" (click)="eliminarCategoria(cat.id)">Eliminar</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Nuevo producto -->
+    <div *ngIf="seccionActiva === 'nuevo'">
+      <h2>Crear Producto</h2>
+      <div class="form-card">
+        <p class="msg-exito" *ngIf="exito">{{ exito }}</p>
+        <p class="msg-error" *ngIf="error">{{ error }}</p>
+
+        <div class="field">
+          <label>Nombre</label>
+          <input type="text" placeholder="Nombre del producto" [(ngModel)]="producto.nombre" />
+        </div>
+
+        <div class="field">
+          <label>Descripción</label>
+          <textarea placeholder="Descripción" [(ngModel)]="producto.descripcion"></textarea>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label>Precio</label>
+            <input type="number" placeholder="45000" [(ngModel)]="producto.precio" />
+            <span class="precio-preview" *ngIf="producto.precio">{{ producto.precio | precio }}</span>
+          </div>
+          <div class="field">
+            <label>Stock</label>
+            <input type="number" placeholder="10" [(ngModel)]="producto.stock" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>URL Imagen</label>
+          <input type="text" placeholder="https://..." [(ngModel)]="producto.urlImagen" />
+        </div>
+
+        <div class="field">
+          <label>Categoría</label>
+          <select [(ngModel)]="producto.categoria">
+            <option [ngValue]="null">Selecciona una categoría</option>
+            <option *ngFor="let cat of categorias" [ngValue]="cat">{{ cat.nombre }}</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Colores (separados por coma)</label>
+          <input type="text" placeholder="Negro,Blanco,Gris" [(ngModel)]="producto.colores" />
+          <div class="colores-preview" *ngIf="producto.colores">
+            <span *ngFor="let c of producto.colores.split(',')" class="color-dot-preview"
+              [style.background]="getColorHex(c.trim())" [title]="c.trim()">
+            </span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Tallas (separadas por coma)</label>
+          <input type="text" placeholder="XS,S,M,L,XL" [(ngModel)]="producto.tallas" />
+          <div class="tallas-preview" *ngIf="producto.tallas">
+            <span *ngFor="let t of producto.tallas.split(',')" class="talla-tag">{{ t.trim() }}</span>
+          </div>
+        </div>
+
+        <button class="btn-crear" (click)="crearProducto()">Crear Producto</button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Modal editar producto -->
+  <div class="modal-overlay" *ngIf="mostrarModalEditar" (click)="cancelarEdicion()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <h3>Editar Producto</h3>
+
+    <div class="field">
+      <label>Nombre</label>
+      <input type="text" [(ngModel)]="productoEditando.nombre" />
+    </div>
+
+    <div class="field">
+      <label>Descripción</label>
+      <textarea [(ngModel)]="productoEditando.descripcion"></textarea>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>Precio</label>
+        <input type="number" [(ngModel)]="productoEditando.precio" />
+        <span class="precio-preview" *ngIf="productoEditando.precio">{{ productoEditando.precio | precio }}</span>
+      </div>
+      <div class="field">
+        <label>Stock</label>
+        <input type="number" [(ngModel)]="productoEditando.stock" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label>URL Imagen</label>
+      <input type="text" [(ngModel)]="productoEditando.urlImagen" />
+    </div>
+
+    <div class="field">
+      <label>Categoría</label>
+      <select [(ngModel)]="productoEditando.categoria">
+        <option *ngFor="let cat of categorias" [ngValue]="cat">{{ cat.nombre }}</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Colores (separados por coma)</label>
+      <input type="text" placeholder="Negro,Blanco,Gris" [(ngModel)]="productoEditando.colores" />
+      <div class="colores-preview" *ngIf="productoEditando.colores">
+        <span
+          *ngFor="let c of productoEditando.colores.split(',')"
+          class="color-dot-preview"
+          [style.background]="getColorHex(c.trim())">
+        </span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Tallas (separadas por coma)</label>
+      <input type="text" placeholder="XS,S,M,L,XL" [(ngModel)]="productoEditando.tallas" />
+      <div class="tallas-preview" *ngIf="productoEditando.tallas">
+        <span *ngFor="let t of productoEditando.tallas.split(',')" class="talla-tag">{{ t.trim() }}</span>
+      </div>
+    </div>
+
+    <div class="modal-acciones">
+      <button class="btn-crear" (click)="guardarEdicion()">Guardar</button>
+      <button class="btn-cancelar" (click)="cancelarEdicion()">Cancelar</button>
     </div>
   </div>
+</div>
+
 </div>

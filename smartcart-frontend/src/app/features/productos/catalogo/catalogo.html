@@ -1,0 +1,76 @@
+<div class="catalogo-page">
+  <aside class="filtros">
+    <h3>Filtros</h3>
+
+    <div class="filtro-grupo">
+      <h4>Categoría</h4>
+      <label *ngFor="let cat of categorias">
+        <input type="radio" name="categoria" [value]="cat.nombre" [(ngModel)]="categoriaSeleccionada" />
+        {{ cat.nombre }}
+      </label>
+      <label>
+        <input type="radio" name="categoria" value="" [(ngModel)]="categoriaSeleccionada" />
+        Todas
+      </label>
+    </div>
+
+    <div class="filtro-grupo">
+      <h4>Precio</h4>
+      <label>
+        <input type="radio" name="precio" value="menos50" [(ngModel)]="precioSeleccionado" />
+        Menos de $50.000
+      </label>
+      <label>
+        <input type="radio" name="precio" value="50a100" [(ngModel)]="precioSeleccionado" />
+        $50.000 - $100.000
+      </label>
+      <label>
+        <input type="radio" name="precio" value="mas100" [(ngModel)]="precioSeleccionado" />
+        Más de $100.000
+      </label>
+      <label>
+        <input type="radio" name="precio" value="" [(ngModel)]="precioSeleccionado" />
+        Todos
+      </label>
+    </div>
+
+    <button class="btn-aplicar" (click)="aplicarFiltros()">Aplicar Filtros</button>
+    <button class="btn-limpiar" (click)="limpiarFiltros()">Limpiar</button>
+  </aside>
+
+  <main class="catalogo-main">
+    <div class="catalogo-header">
+      <h2>Explorar Catálogo</h2>
+      <div class="ordenar">
+        <label>Ordenar por:</label>
+        <select [(ngModel)]="ordenSeleccionado" (change)="aplicarFiltros()">
+          <option value="relevante">Más Relevante</option>
+          <option value="precio-asc">Precio: Menor a Mayor</option>
+          <option value="precio-desc">Precio: Mayor a Menor</option>
+          <option value="nombre">Nombre A-Z</option>
+        </select>
+      </div>
+    </div>
+
+    <p class="conteo">Mostrando {{ productosFiltrados.length }} de {{ productos.length }} productos</p>
+
+    <div class="grid">
+      <div class="card" *ngFor="let p of productosFiltrados" (click)="irADetalle(p.id)">
+        <div class="card-img-wrapper">
+          <img [src]="p.urlImagen" [alt]="p.nombre" onerror="this.src='https://placehold.co/300x400?text=Sin+imagen'">
+          <button class="like-btn" (click)="toggleLike($event, p)" [class.liked]="p.liked">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" [attr.fill]="p.liked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+          </button>
+        </div>
+        <div class="info">
+          <h3>{{ p.nombre }}</h3>
+          <p class="categoria">{{ p.categoria?.nombre }}</p>
+          <p class="precio">{{ p.precio | precio }}</p>
+          <button class="btn-agregar" (click)="agregarCarrito(p)">Agregar</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

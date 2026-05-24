@@ -1,0 +1,230 @@
+:host {
+  --dusk: oklch(0.16 0.012 40);
+  --clay-base: oklch(0.20 0.014 40);
+  --clay-surface: oklch(0.24 0.014 40);
+  --clay-raised: oklch(0.30 0.016 40);
+  --terra: oklch(0.62 0.13 45);
+  --terra-dim: oklch(0.55 0.12 45);
+  --sand: oklch(0.92 0.012 70);
+  --sand-dim: oklch(0.72 0.014 70);
+}
+
+.recomendados-page {
+  background: var(--dusk);
+  min-height: 100vh;
+  font-family: 'Manrope', sans-serif;
+  padding-top: 4rem;
+}
+
+.rec-hero {
+  padding: 4rem;
+  background: linear-gradient(135deg, var(--clay-base), var(--dusk));
+  border-bottom: 1px solid var(--clay-raised);
+}
+
+.rec-hero-text {
+  max-width: 600px;
+}
+
+.badge {
+  background: var(--terra);
+  color: var(--sand);
+  padding: 0.3rem 1rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  display: inline-block;
+  margin-bottom: 1rem;
+}
+
+.rec-hero-text h1 {
+  font-family: 'Newsreader', serif;
+  font-size: 3rem;
+  font-weight: 500;
+  color: var(--sand);
+  margin: 0 0 1rem;
+  line-height: 1.1;
+}
+
+.rec-hero-text p {
+  color: var(--sand-dim);
+  font-size: 1rem;
+  margin: 0 0 1.5rem;
+  line-height: 1.6;
+}
+
+.btn-login {
+  background: var(--terra);
+  color: var(--sand);
+  border: none;
+  padding: 0.8rem 2rem;
+  border-radius: 999px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-login:hover {
+  background: var(--terra-dim);
+  transform: translateY(-2px);
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+  gap: 1rem;
+  color: var(--sand-dim);
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--clay-raised);
+  border-top-color: var(--terra);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.rec-section {
+  padding: 3rem 4rem;
+}
+
+.section-header {
+  margin-bottom: 2rem;
+}
+
+.section-header h2 {
+  font-family: 'Newsreader', serif;
+  font-size: 2rem;
+  font-weight: 500;
+  color: var(--sand);
+  margin: 0 0 0.3rem;
+}
+
+.section-sub {
+  color: var(--sand-dim);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.card {
+  background: var(--clay-base);
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--clay-raised);
+  transition: transform 0.2s;
+}
+
+.card:hover { transform: translateY(-4px); }
+
+.card-img-wrapper { position: relative; }
+
+.card img {
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+}
+
+.like-btn {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.4);
+  border: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  backdrop-filter: blur(4px);
+}
+
+.like-btn:hover { background: rgba(0,0,0,0.6); }
+.like-btn.liked { background: var(--terra); }
+
+.info { padding: 1rem; }
+
+.info h3 {
+  margin: 0 0 0.3rem;
+  font-size: 0.95rem;
+  color: var(--sand);
+}
+
+.categoria {
+  font-size: 0.8rem;
+  color: var(--sand-dim);
+  margin: 0 0 0.4rem;
+}
+
+.precio {
+  font-weight: bold;
+  color: var(--terra);
+  margin: 0;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 4rem;
+  background: var(--clay-base);
+  border-radius: 20px;
+  border: 1px solid var(--clay-raised);
+  gap: 1rem;
+  color: var(--sand-dim);
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.empty-state h3 {
+  font-family: 'Newsreader', serif;
+  font-size: 1.5rem;
+  color: var(--sand);
+  margin: 0;
+}
+
+.empty-state p {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.btn-catalogo {
+  background: var(--terra);
+  color: var(--sand);
+  border: none;
+  padding: 0.8rem 2rem;
+  border-radius: 999px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: all 0.2s;
+}
+
+.btn-catalogo:hover {
+  background: var(--terra-dim);
+  transform: translateY(-2px);
+}

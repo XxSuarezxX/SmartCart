@@ -24,18 +24,18 @@ export class LoginComponent {
 
   onLogin() {
     this.authService.login(this.email, this.password).subscribe({
-      next: (res) => {
-        this.authService.guardarSesion(res.token, res.username, res.rol);
-        if (res.rol === 'ADMIN') {
-          this.router.navigate(['/admin']);
-        } else {
-          this.router.navigate(['/']);
-        }
-      },
-      error: () => {
-        this.error = 'Usuario o contraseña incorrectos';
-        this.cdr.detectChanges();
-      }
-    });
+        next: (res) => {
+          this.authService.guardarSesion(res.token, res.username, res.rol, res.id);
+          if (res.rol === 'ADMIN') {
+            this.router.navigate(['/admin']);
+          } else {
+            this.router.navigate(['/']);
+          }
+        },
+          error: () => {
+            this.error = 'Usuario o contraseña incorrectos';
+            this.cdr.detectChanges();
+          }
+      });
   }
 }

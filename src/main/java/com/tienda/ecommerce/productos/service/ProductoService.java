@@ -35,6 +35,10 @@ public class ProductoService {
         return productoRepository.findAll();
     }
 
+    public Producto findById(Long id) {
+        return productoRepository.findById(id).orElse(null);
+    }
+
     public Producto guardarProducto(Producto producto) {
         // Aquí podríamos validar si la categoría existe antes de guardar
         return productoRepository.save(producto);

@@ -3,7 +3,6 @@ package com.tienda.ecommerce.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -14,7 +13,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import java.util.List;
 
 @Configuration
-@EnableMethodSecurity
 public class SeguridadConfig {
 
     private final JwtFilter jwtFilter;
@@ -41,15 +39,12 @@ public class SeguridadConfig {
                     return config;
                 }))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/usuarios/**", "/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/productos/**", "/api/products/**").permitAll()
-                        .requestMatchers("/api/interacciones/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/interacciones/registrar", "/api/interacciones/sugeridos/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/productos/**", "/api/products/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/productos/**", "/api/products/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/productos/**", "/api/products/**").hasRole("ADMIN")
+                        .requestMatchers("/api/interacciones/registrar").permitAll()
+                        .requestMatchers("/api/interacciones/sugeridos/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/productos/**").permitAll()
                         .anyRequest().authenticated())
-                // ESTO ES LO QUE FALTABA:
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 

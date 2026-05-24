@@ -25,6 +25,10 @@ public class Producto {
 
     private String urlImagen;
 
+    private String colores;
+    
+    private String tallas;
+
     @ManyToOne // Muchos productos pertenecen a una categoría
     @JoinColumn(name = "categoria_id", nullable = false)
     private Categoria categoria;
