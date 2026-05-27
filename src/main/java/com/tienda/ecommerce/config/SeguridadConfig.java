@@ -44,7 +44,8 @@ public class SeguridadConfig {
                         .requestMatchers("/api/pagos/**").permitAll() // <-- AGREGAMOS ESTA LÍNEA
                         .requestMatchers("/api/interacciones/registrar").permitAll()
                         .requestMatchers("/api/interacciones/sugeridos/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/productos/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/productos/cargar-csv").permitAll() // <-- PRIMERO LA ESPECÍFICA
+                        .requestMatchers(HttpMethod.GET, "/productos/**").permitAll()          // <-- LUEGO LA GENERAL
                         .anyRequest().authenticated())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
