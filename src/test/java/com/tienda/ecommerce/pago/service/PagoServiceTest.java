@@ -27,6 +27,8 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -47,6 +49,12 @@ class PagoServiceTest {
     @Mock
     private RecomendacionService recomendacionService;
 
+    @Mock
+    private ReciboPdfService reciboPdfService;
+
+    @Mock
+    private EmailService emailService;
+
     @InjectMocks
     private PagoService pagoService;
 
@@ -58,6 +66,7 @@ class PagoServiceTest {
         usuario = new Usuario();
         usuario.setId(1L);
         usuario.setNombre("Juan");
+        usuario.setEmail("juan@test.com");
 
         categoria = new Categoria();
         categoria.setId(50L);
@@ -89,6 +98,7 @@ class PagoServiceTest {
         when(carritoService.obtenerCarrito(1L)).thenReturn(List.of(item1, item2));
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
         when(pagoRepository.save(any(Pago.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(reciboPdfService.generarRecibo(any(Pago.class), anyList())).thenReturn(new byte[]{1, 2, 3});
 
         Pago resultado = pagoService.procesarPago(request);
 
@@ -109,6 +119,9 @@ class PagoServiceTest {
 
         verify(carritoService).vaciarCarrito(1L);
         verify(pagoRepository).save(any(Pago.class));
+
+        verify(reciboPdfService).generarRecibo(any(Pago.class), anyList());
+        verify(emailService).enviarReciboCompra(eq("juan@test.com"), eq("Juan"), any(), any(byte[].class));
     }
 
     @Test

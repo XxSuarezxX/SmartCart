@@ -9,6 +9,8 @@ import com.tienda.ecommerce.recomendacion.model.Interaccion;
 import com.tienda.ecommerce.recomendacion.service.RecomendacionService;
 import com.tienda.ecommerce.usuarios.model.Usuario;
 import com.tienda.ecommerce.usuarios.repository.UsuarioRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,17 +20,24 @@ import java.util.List;
 @Service
 public class PagoService {
 
+    private static final Logger log = LoggerFactory.getLogger(PagoService.class);
+
     private final PagoRepository pagoRepository;
     private final CarritoService carritoService;
     private final UsuarioRepository usuarioRepository;
     private final RecomendacionService recomendacionService;
+    private final ReciboPdfService reciboPdfService;
+    private final EmailService emailService;
 
     public PagoService(PagoRepository pagoRepository, CarritoService carritoService,
-                       UsuarioRepository usuarioRepository, RecomendacionService recomendacionService) {
+                       UsuarioRepository usuarioRepository, RecomendacionService recomendacionService,
+                       ReciboPdfService reciboPdfService, EmailService emailService) {
         this.pagoRepository = pagoRepository;
         this.carritoService = carritoService;
         this.usuarioRepository = usuarioRepository;
         this.recomendacionService = recomendacionService;
+        this.reciboPdfService = reciboPdfService;
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -67,8 +76,28 @@ public class PagoService {
             recomendacionService.guardarInteraccion(nuevaInteraccion);
         }
 
-        // 5. Vaciar el carrito y guardar el pago
+        // 5. Guardar el pago y luego enviar el recibo (antes de vaciar el carrito
+        // para conservar los items que se usarán al armar el PDF).
+        Pago pagoGuardado = pagoRepository.save(pago);
+        enviarReciboPorCorreo(pagoGuardado, items);
+
+        // 6. Vaciar el carrito
         carritoService.vaciarCarrito(usuario.getId());
-        return pagoRepository.save(pago);
+        return pagoGuardado;
+    }
+
+    private void enviarReciboPorCorreo(Pago pago, List<Carrito> items) {
+        Usuario usuario = pago.getUsuario();
+        if (usuario.getEmail() == null || usuario.getEmail().isBlank()) {
+            log.warn("Usuario {} sin correo registrado; se omite el envío del recibo", usuario.getId());
+            return;
+        }
+        try {
+            byte[] pdf = reciboPdfService.generarRecibo(pago, items);
+            emailService.enviarReciboCompra(usuario.getEmail(), usuario.getNombre(), pago.getId(), pdf);
+        } catch (Exception e) {
+            // El pago ya fue procesado; un fallo en el correo no debe revertirlo.
+            log.error("No se pudo preparar/enviar el recibo del pago {}: {}", pago.getId(), e.getMessage(), e);
+        }
     }
 }
