@@ -1,15 +1,23 @@
 package com.tienda.ecommerce.productos.controller;
 
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.tienda.ecommerce.productos.model.Categoria;
 import com.tienda.ecommerce.productos.model.Producto;
 import com.tienda.ecommerce.productos.service.ProductoService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpStatus;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/productos")
@@ -69,7 +77,11 @@ public class ProductoController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El archivo está vacío");
         }
 
-        productoService.cargarProductosDesdeCsv(file);
-        return ResponseEntity.ok("Productos cargados exitosamente desde el CSV");
+        try {
+            String resumen = productoService.cargarProductosDesdeCsv(file);
+            return ResponseEntity.ok(resumen);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al cargar el CSV: " + e.getMessage());
+        }
     }
 }

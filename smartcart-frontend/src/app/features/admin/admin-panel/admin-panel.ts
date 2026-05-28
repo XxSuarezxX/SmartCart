@@ -2,7 +2,8 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { finalize } from 'rxjs/operators';
 import { AuthService } from '../../../core/services/auth';
 import { AdminService } from '../../../core/services/admin';
 import { ProductoService } from '../../../core/services/producto';
@@ -176,31 +177,40 @@ export class AdminPanelComponent implements OnInit {
   }
 
   subirCSV() {
-  if (!this.archivoCSV) return;
-  this.cargandoCSV = true;
-  this.exitoCSV = '';
-  this.errorCSV = '';
+    if (!this.archivoCSV) return;
+    this.cargandoCSV = true;
+    this.exitoCSV = '';
+    this.errorCSV = '';
 
-  const formData = new FormData();
-  formData.append('file', this.archivoCSV);
+    const formData = new FormData();
+    formData.append('file', this.archivoCSV);
 
-  const headers = { 'Authorization': `Bearer ${this.authService.getToken()}` };
+    const headers = new HttpHeaders({ Authorization: `Bearer ${this.authService.getToken()}` });
 
-  this.http.post('http://localhost:8080/productos/cargar-csv', formData, { headers }).subscribe({
-    next: () => {
-      this.exitoCSV = 'Productos cargados correctamente';
-      this.archivoCSV = null;
-      this.cargandoCSV = false;
-      this.cargarProductos();
-      this.cdr.detectChanges();
-    },
-    error: () => {
-      this.errorCSV = 'Error al subir el archivo. Verifica el formato del CSV.';
-      this.cargandoCSV = false;
-      this.cdr.detectChanges();
-    }
-  });
-}
+    this.http.post('http://localhost:8080/productos/cargar-csv', formData, {
+      headers,
+      responseType: 'text'
+    }).pipe(
+      finalize(() => {
+        this.cargandoCSV = false;
+        this.cdr.detectChanges();
+      })
+    ).subscribe({
+      next: (response: string) => {
+        console.log('CSV upload response:', response);
+        this.exitoCSV = response || 'Productos cargados correctamente';
+        this.archivoCSV = null;
+        this.cargarProductos();
+      },
+      error: (err) => {
+        console.error('CSV upload error:', err);
+        const backendMessage = typeof err.error === 'string' && err.error.trim() ? err.error : null;
+        this.errorCSV = backendMessage
+          ? backendMessage
+          : `Error al subir el archivo. ${err.status ? err.status + ' ' + err.statusText : err.message}`;
+      }
+    });
+  }
 
   getColorHex(nombre: string): string {
     const map: any = {
