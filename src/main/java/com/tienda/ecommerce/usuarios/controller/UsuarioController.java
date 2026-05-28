@@ -19,6 +19,11 @@ public class UsuarioController {
         this.usuarioService = usuarioService;
     }
 
+    @GetMapping("/usuarios")
+public java.util.List<Usuario> listarUsuarios() {
+    return usuarioService.listarTodos();
+}
+
     @PostMapping("/registro")
     public Usuario registrar(@RequestBody Usuario usuario) {
         return usuarioService.registrar(usuario);
@@ -32,5 +37,7 @@ public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginReques
     } catch (RuntimeException e) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
+
+    
 }
 }

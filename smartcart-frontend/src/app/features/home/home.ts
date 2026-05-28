@@ -71,15 +71,17 @@ export class HomeComponent implements OnInit {
   }
 
   agregarCarrito(producto: any) {
-    const carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
-    const existe = carrito.find((p: any) => p.id === producto.id);
-    if (existe) {
-      existe.cantidad++;
-    } else {
-      carrito.push({ ...producto, cantidad: 1 });
-    }
-    localStorage.setItem('carrito', JSON.stringify(carrito));
+  if (!this.authService.isLoggedIn()) {
+    this.router.navigate(['/login']);
+    return;
   }
+  const userId = this.authService.getUserId();
+  // Lo agregamos via backend
+  import('../../core/services/carrito').then(m => {
+    // Por ahora navegamos al detalle para agregar
+    this.router.navigate(['/producto', producto.id]);
+  });
+}
 
   getColorHex(color: string): string {
   const colores: { [key: string]: string } = {

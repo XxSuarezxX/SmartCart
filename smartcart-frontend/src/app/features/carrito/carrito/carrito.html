@@ -1,0 +1,146 @@
+<div class="carrito-page">
+
+    <!-- Pago exitoso -->
+    <div class="pago-exitoso" *ngIf="pagoExitoso">
+        <div class="exito-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+        </div>
+        <h2>¡Pago exitoso!</h2>
+        <p>Tu pedido ha sido procesado correctamente. Recibirás un correo de confirmación.</p>
+        <button class="btn-seguir" (click)="irACatalogo()">Seguir comprando</button>
+    </div>
+
+    <div class="carrito-container" *ngIf="!pagoExitoso">
+
+        <div class="carrito-header">
+            <h1>Mi Carrito</h1>
+            <button class="btn-vaciar" *ngIf="items.length > 0" (click)="vaciarCarrito()">Vaciar carrito</button>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading" *ngIf="cargando">
+            <div class="spinner"></div>
+        </div>
+
+        <!-- Carrito vacío -->
+        <div class="carrito-vacio" *ngIf="!cargando && items.length === 0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1">
+                <circle cx="9" cy="21" r="1" />
+                <circle cx="20" cy="21" r="1" />
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+            </svg>
+            <h3>Tu carrito está vacío</h3>
+            <p>Agrega productos desde el catálogo</p>
+            <button class="btn-catalogo" (click)="irACatalogo()">Ir al catálogo</button>
+        </div>
+
+        <!-- Contenido del carrito -->
+        <div class="carrito-grid" *ngIf="!cargando && items.length > 0">
+
+            <!-- Items -->
+            <div class="items-lista">
+                <div class="item" *ngFor="let item of items">
+                    <img [src]="item.producto.urlImagen" [alt]="item.producto.nombre"
+                        onerror="this.src='https://placehold.co/80x80?text=IMG'">
+                    <div class="item-info">
+                        <h3>{{ item.producto.nombre }}</h3>
+                        <p class="item-precio">{{ item.producto.precio | precio }}</p>
+                    </div>
+                    <div class="item-cantidad">
+                        <button (click)="actualizarCantidad(item, item.cantidad - 1)">−</button>
+                        <span>{{ item.cantidad }}</span>
+                        <button (click)="actualizarCantidad(item, item.cantidad + 1)">+</button>
+                    </div>
+                    <p class="item-subtotal">{{ item.producto.precio * item.cantidad | precio }}</p>
+                    <button class="btn-eliminar-item" (click)="eliminarItem(item)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6" />
+                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                            <path d="M10 11v6M14 11v6" />
+                            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Resumen y pago -->
+            <div class="resumen-pago">
+
+                <!-- Resumen -->
+                <div class="resumen-card">
+                    <h3>Resumen del pedido</h3>
+                    <div class="resumen-fila" *ngFor="let item of items">
+                        <span>{{ item.producto.nombre }} x{{ item.cantidad }}</span>
+                        <span>{{ item.producto.precio * item.cantidad | precio }}</span>
+                    </div>
+                    <div class="resumen-divider"></div>
+                    <div class="resumen-fila total">
+                        <span>Total</span>
+                        <span>{{ total | precio }}</span>
+                    </div>
+                </div>
+
+                <!-- Formulario de pago -->
+                <div class="pago-card">
+                    <h3>Datos de pago</h3>
+                    <p class="error-msg" *ngIf="error">{{ error }}</p>
+
+                    <div class="field">
+                        <label>Número de tarjeta</label>
+                        <input type="text" placeholder="0000 0000 0000 0000" [value]="pago.numeroTarjeta"
+                            (input)="formatearTarjeta($event)" maxlength="19" />
+                    </div>
+
+                    <div class="field">
+                        <label>Nombre del titular</label>
+                        <input type="text" placeholder="Como aparece en la tarjeta" [(ngModel)]="pago.nombreTitular" />
+                    </div>
+
+                    <div class="row">
+                        <div class="field">
+                            <label>Fecha de vencimiento</label>
+                            <input type="text" placeholder="MM/AA" [(ngModel)]="pago.fechaVencimiento" maxlength="5"
+                                (input)="formatearFecha($event)" />
+                        </div>
+                        <div class="field">
+                            <label>CVV</label>
+                            <input type="password" placeholder="•••" [(ngModel)]="pago.cvv" maxlength="4" />
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>Dirección de envío</label>
+                        <input type="text" placeholder="Calle, número, ciudad, departamento"
+                            [(ngModel)]="pago.direccionEnvio" />
+                    </div>
+                    <button class="btn-pagar" (click)="procesarPago()" [disabled]="procesandoPago">
+                        <span *ngIf="!procesandoPago">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+                                <line x1="1" y1="10" x2="23" y2="10" />
+                            </svg>
+                            Pagar {{ total | precio }}
+                        </span>
+                        <span *ngIf="procesandoPago">Procesando...</span>
+                    </button>
+
+                    <p class="seguro-txt">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                        </svg>
+                        Pago seguro y protegido
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

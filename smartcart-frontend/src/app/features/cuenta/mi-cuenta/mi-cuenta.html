@@ -10,7 +10,7 @@
             </div>
             <div>
                 <p class="perfil-nombre">{{ username }}</p>
-                <p class="perfil-email">Cliente SmartCart</p>
+                <p class="perfil-email">{{ rol }}</p>
             </div>
         </div>
 
@@ -56,8 +56,9 @@
 
         <!-- Mis Compras -->
         <div *ngIf="seccionActiva === 'compras'">
-            <h2>Mis Compras Recientes</h2>
-            <div class="empty-state">
+            <h2>Mis Compras</h2>
+
+            <div class="empty-state" *ngIf="compras.length === 0">
                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="1">
                     <circle cx="9" cy="21" r="1" />
@@ -66,6 +67,81 @@
                 </svg>
                 <p>Aún no tienes compras</p>
                 <span>Cuando realices una compra aparecerá aquí</span>
+            </div>
+
+            <div class="compras-lista" *ngIf="compras.length > 0">
+                <div class="compra-card" *ngFor="let compra of compras" (click)="toggleDetalle(compra)"
+                    style="cursor:pointer">
+                    <div class="compra-header">
+                        <div>
+                            <p class="compra-id">Pedido del {{ compra.fechaPago | date:'dd/MM/yyyy' }}</p>
+                            <p class="compra-fecha">{{ compra.fechaPago | date:'dd/MM/yyyy HH:mm' }}</p>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:1rem;">
+                            <span class="estado-badge" [class.exitoso]="compra.estado === 'EXITOSO'">
+                                {{ compra.estado }}
+                            </span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2"
+                                [style.transform]="compra.abierto ? 'rotate(180deg)' : 'rotate(0deg)'"
+                                style="transition:transform 0.2s; color: var(--sand-dim)">
+                                <polyline points="6 9 12 15 18 9" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Detalle expandible -->
+                    <div class="compra-detalle" *ngIf="compra.abierto">
+                        <div class="detalle-fila">
+                            <span class="detalle-label">ID del pedido</span>
+                            <span class="detalle-valor">#{{ compra.id }}</span>
+                        </div>
+                        <div class="detalle-fila">
+                            <span class="detalle-label">Fecha</span>
+                            <span class="detalle-valor">{{ compra.fechaPago | date:'dd/MM/yyyy HH:mm' }}</span>
+                        </div>
+                        <div class="detalle-fila">
+                            <span class="detalle-label">Estado</span>
+                            <span class="detalle-valor"
+                                [style.color]="compra.estado === 'EXITOSO' ? '#4caf50' : '#e57373'">
+                                {{ compra.estado }}
+                            </span>
+                        </div>
+
+                        <!-- Items de la compra -->
+                        <div class="items-lista" *ngIf="compra.items && compra.items.length > 0">
+                            <p class="items-titulo">Productos comprados</p>
+                            <div class="item-fila" *ngFor="let item of compra.items">
+                                <img [src]="item.urlImagen" [alt]="item.nombreProducto"
+                                    onerror="this.src='https://placehold.co/48x48?text=IMG'" class="item-img" />
+                                <div class="item-info">
+                                    <span class="item-nombre">{{ item.nombreProducto }}</span>
+                                    <span class="item-detalle">Cant: {{ item.cantidad }} · {{ item.precioUnitario |
+                                        precio }} c/u</span>
+                                </div>
+                                <span class="item-subtotal">{{ (item.precioUnitario * item.cantidad) | precio }}</span>
+                            </div>
+                        </div>
+
+                        <div class="detalle-fila total">
+                            <span class="detalle-label">Total pagado</span>
+                            <span class="detalle-valor">{{ compra.montoTotal | precio }}</span>
+                        </div>
+
+                        <p class="recibo-txt">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="4" width="20" height="16" rx="2" />
+                                <polyline points="22,6 12,13 2,6" />
+                            </svg>
+                            El recibo fue enviado a tu correo
+                        </p>
+                    </div>
+
+                    <div class="compra-footer">
+                        <span class="compra-total">Total: {{ compra.montoTotal | precio }}</span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -82,12 +158,12 @@
                 <span>Dale like a productos para guardarlos aquí</span>
             </div>
             <div class="grid" *ngIf="favoritos.length > 0">
-                <div class="card" *ngFor="let p of favoritos">
-                    <img [src]="p.url_imagen" [alt]="p.nombre"
+                <div class="card" *ngFor="let p of favoritos" (click)="irAProducto(p.id)">
+                    <img [src]="p.urlImagen" [alt]="p.nombre"
                         onerror="this.src='https://placehold.co/300x400?text=Sin+imagen'">
                     <div class="info">
                         <h3>{{ p.nombre }}</h3>
-                        <p class="precio">${{ p.precio }}</p>
+                        <p class="precio">{{ p.precio | precio }}</p>
                     </div>
                 </div>
             </div>

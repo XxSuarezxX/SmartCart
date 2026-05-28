@@ -5,7 +5,10 @@ import lombok.Getter;
 import lombok.Setter;
 import com.tienda.ecommerce.usuarios.model.Usuario;
 import java.time.LocalDateTime;
-
+import com.tienda.ecommerce.pago.model.PagoItem;
+import jakarta.persistence.FetchType;
+import java.util.ArrayList;
+import java.util.List;
 @Entity
 @Table(name = "pagos")
 @Getter
@@ -28,4 +31,9 @@ public class Pago {
 
     @Column(nullable = false)
     private String estado; // "EXITOSO", "RECHAZADO"
+
+    private String direccionEnvio;
+
+    @OneToMany(mappedBy = "pago", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<PagoItem> items = new ArrayList<>();
 }

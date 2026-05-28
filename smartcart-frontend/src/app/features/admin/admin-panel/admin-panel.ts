@@ -1,10 +1,11 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ProductoService } from '../../../core/services/producto';
-import { AuthService } from '../../../core/services/auth';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { AuthService } from '../../../core/services/auth';
+import { AdminService } from '../../../core/services/admin';
+import { ProductoService } from '../../../core/services/producto';
 import { PrecioPipe } from '../../../shared/pipes/precio-pipe';
 
 @Component({
@@ -17,152 +18,93 @@ import { PrecioPipe } from '../../../shared/pipes/precio-pipe';
 export class AdminPanelComponent implements OnInit {
   seccionActiva = 'dashboard';
   adminName = '';
-  ranking: any[] = [];
+
+  dashboard: any = null;
   productos: any[] = [];
   categorias: any[] = [];
-  productoEditando: any = null;
+  ranking: any[] = [];
+  usuarios: any[] = [];
+  sinStockCount = 0;
+
+  producto: any = { nombre: '', descripcion: '', precio: null, stock: null, urlImagen: '', categoria: null, colores: '', tallas: '' };
+  nuevaCategoria: any = { nombre: '' };
+  productoEditando: any = {};
   mostrarModalEditar = false;
-  nuevaCategoria = { nombre: '' };
+  exito = '';
+  error = '';
   exitoCategoria = '';
   errorCategoria = '';
 
-  producto: any = {
-    nombre: '',
-    descripcion: '',
-    precio: 0,
-    stock: 0,
-    urlImagen: '',
-    colores: '',
-    tallas: '',
-    categoria: null
-  };
-
-
-  exito = '';
-  error = '';
-
-  private apiUrl = 'http://localhost:8080';
+  // CSV
+  archivoCSV: File | null = null;
+  exitoCSV = '';
+  errorCSV = '';
+  cargandoCSV = false;
 
   constructor(
-    private productoService: ProductoService,
     private authService: AuthService,
-    private http: HttpClient,
+    private adminService: AdminService,
+    private productoService: ProductoService,
     private router: Router,
-    private cdr: ChangeDetectorRef
-  ) { }
+    private cdr: ChangeDetectorRef,
+    private http: HttpClient
+  ) {}
 
   ngOnInit() {
     this.adminName = this.authService.getUsername() || 'Admin';
-    this.cargarRanking();
+    this.cargarDashboard();
     this.cargarProductos();
-    this.productoService.getCategorias().subscribe((data: any[]) => {
-      this.categorias = data;
+    this.cargarCategorias();
+    this.authService.getUsuarios().subscribe((data: any[]) => {
+      this.usuarios = data.filter(u => u.rol === 'CLIENTE');
       this.cdr.detectChanges();
     });
   }
 
-  private getHeaders(): HttpHeaders {
-    return new HttpHeaders({
-      Authorization: `Bearer ${this.authService.getToken()}`
-    });
-  }
-
-  getColorHex(color: string): string {
-    const colores: { [key: string]: string } = {
-      'Negro': '#1a1a1a',
-      'Blanco': '#f5f5f5',
-      'Gris': '#808080',
-      'Café': '#8B4513',
-      'Azul': '#1e3a8a',
-      'Azul Navy': '#1e3a8a',
-      'Verde Oliva': '#556B2F',
-      'Rojo': '#dc2626',
-      'Rosa': '#ec4899',
-    };
-    return colores[color] || '#888';
-  }
-
-  cargarRanking() {
-    this.http.get<any[]>(`${this.apiUrl}/api/interacciones/admin/ranking`, {
-      headers: this.getHeaders()
-    }).subscribe({
-      next: (data: any[]) => {
-        this.ranking = data;
+  cargarDashboard() {
+    this.adminService.getDashboard().subscribe({
+      next: (data) => {
+        this.dashboard = data;
         this.cdr.detectChanges();
       },
-      error: () => {
-        this.ranking = [];
-        this.cdr.detectChanges();
-      }
+      error: (err) => console.error('Error dashboard:', err)
     });
   }
 
   cargarProductos() {
     this.productoService.getProductos().subscribe((data: any[]) => {
       this.productos = data;
+      this.sinStockCount = data.filter(p => p.stock === 0).length;
       this.cdr.detectChanges();
     });
   }
 
-  setSeccion(seccion: string) {
-    this.seccionActiva = seccion;
+  cargarCategorias() {
+    this.productoService.getCategorias().subscribe({
+      next: (data) => {
+        this.categorias = data;
+        this.cdr.detectChanges();
+      },
+      error: () => {}
+    });
+  }
+
+  setSeccion(s: string) {
+    this.seccionActiva = s;
+    if (s === 'dashboard') this.cargarDashboard();
     this.cdr.detectChanges();
   }
 
   crearProducto() {
     this.productoService.crearProducto(this.producto).subscribe({
       next: () => {
-        this.exito = 'Producto creado exitosamente';
+        this.exito = 'Producto creado correctamente';
         this.error = '';
-        this.producto = { nombre: '', descripcion: '', precio: 0, stock: 0, urlImagen: '', colores: '', tallas: '', categoria: null };
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.error = 'Error al crear el producto';
-        this.exito = '';
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  editarProducto(producto: any) {
-    this.productoEditando = { ...producto, categoria: { ...producto.categoria } };
-    this.mostrarModalEditar = true;
-    this.cdr.detectChanges();
-  }
-
-  guardarEdicion() {
-    this.productoService.editarProducto(this.productoEditando.id, this.productoEditando).subscribe({
-      next: () => {
-        this.mostrarModalEditar = false;
-        this.productoEditando = null;
+        this.producto = { nombre: '', descripcion: '', precio: null, stock: null, urlImagen: '', categoria: null, colores: '', tallas: '' };
         this.cargarProductos();
         this.cdr.detectChanges();
       },
-      error: () => {
-        this.error = 'Error al editar el producto';
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  cancelarEdicion() {
-    this.mostrarModalEditar = false;
-    this.productoEditando = null;
-    this.cdr.detectChanges();
-  }
-
-  eliminarProducto(id: number) {
-    if (!confirm('¿Seguro que quieres eliminar este producto?')) return;
-    this.productoService.eliminarProducto(id).subscribe({
-      next: () => {
-        this.cargarProductos();
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.error = 'Error al eliminar el producto';
-        this.cdr.detectChanges();
-      }
+      error: () => { this.error = 'Error al crear el producto'; this.exito = ''; this.cdr.detectChanges(); }
     });
   }
 
@@ -172,37 +114,108 @@ export class AdminPanelComponent implements OnInit {
         this.exitoCategoria = 'Categoría creada';
         this.errorCategoria = '';
         this.nuevaCategoria = { nombre: '' };
-        this.productoService.getCategorias().subscribe((data: any[]) => {
-          this.categorias = data;
-          this.cdr.detectChanges();
-        });
-      },
-      error: () => {
-        this.errorCategoria = 'Error al crear categoría';
-        this.exitoCategoria = '';
+        this.cargarCategorias();
         this.cdr.detectChanges();
-      }
+      },
+      error: () => { this.errorCategoria = 'Error al crear categoría'; this.exitoCategoria = ''; this.cdr.detectChanges(); }
+    });
+  }
+
+  eliminarProducto(id: number) {
+    if (!confirm('¿Eliminar este producto?')) return;
+    this.productoService.eliminarProducto(id).subscribe({
+      next: () => { this.cargarProductos(); this.cdr.detectChanges(); },
+      error: () => {}
     });
   }
 
   eliminarCategoria(id: number) {
-    if (!confirm('¿Seguro que quieres eliminar esta categoría?')) return;
+    if (!confirm('¿Eliminar esta categoría?')) return;
     this.productoService.eliminarCategoria(id).subscribe({
-      next: () => {
-        this.productoService.getCategorias().subscribe((data: any[]) => {
-          this.categorias = data;
-          this.cdr.detectChanges();
-        });
-      },
-      error: () => {
-        this.errorCategoria = 'Error al eliminar categoría';
-        this.cdr.detectChanges();
-      }
+      next: () => { this.cargarCategorias(); this.cdr.detectChanges(); },
+      error: () => {}
     });
+  }
+
+  editarProducto(p: any) {
+    this.productoEditando = { ...p };
+    this.mostrarModalEditar = true;
+    this.cdr.detectChanges();
+  }
+
+  guardarEdicion() {
+    this.productoService.editarProducto(this.productoEditando, this.productoEditando.id).subscribe({
+      next: () => {
+        this.mostrarModalEditar = false;
+        this.cargarProductos();
+        this.cdr.detectChanges();
+      },
+      error: () => {}
+    });
+  }
+
+  cancelarEdicion() {
+    this.mostrarModalEditar = false;
+    this.cdr.detectChanges();
+  }
+
+  // CSV
+  onFileSelected(event: any) {
+    this.archivoCSV = event.target.files[0] || null;
+    this.exitoCSV = '';
+    this.errorCSV = '';
+    this.cdr.detectChanges();
+  }
+
+  onFileDrop(event: any) {
+    event.preventDefault();
+    this.archivoCSV = event.dataTransfer.files[0] || null;
+    this.exitoCSV = '';
+    this.errorCSV = '';
+    this.cdr.detectChanges();
+  }
+
+  subirCSV() {
+  if (!this.archivoCSV) return;
+  this.cargandoCSV = true;
+  this.exitoCSV = '';
+  this.errorCSV = '';
+
+  const formData = new FormData();
+  formData.append('file', this.archivoCSV);
+
+  const headers = { 'Authorization': `Bearer ${this.authService.getToken()}` };
+
+  this.http.post('http://localhost:8080/productos/cargar-csv', formData, { headers }).subscribe({
+    next: () => {
+      this.exitoCSV = 'Productos cargados correctamente';
+      this.archivoCSV = null;
+      this.cargandoCSV = false;
+      this.cargarProductos();
+      this.cdr.detectChanges();
+    },
+    error: () => {
+      this.errorCSV = 'Error al subir el archivo. Verifica el formato del CSV.';
+      this.cargandoCSV = false;
+      this.cdr.detectChanges();
+    }
+  });
+}
+
+  getColorHex(nombre: string): string {
+    const map: any = {
+      negro: '#1a1a1a', blanco: '#f5f5f5', gris: '#9e9e9e',
+      rojo: '#e53935', azul: '#1e88e5', verde: '#43a047',
+      amarillo: '#fdd835', naranja: '#fb8c00', rosa: '#e91e8c',
+      morado: '#8e24aa', beige: '#d7ccc8', cafe: '#6d4c41'
+    };
+    return map[nombre.toLowerCase()] || '#888';
   }
 
   logout() {
     this.authService.logout();
-    this.router.navigate(['/']);
+    this.router.navigate(['/login']);
   }
+
+  
 }

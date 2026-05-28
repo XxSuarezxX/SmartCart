@@ -11,4 +11,5 @@ public class PagoRequest {
     private String nombreTitular;
     private String fechaVencimiento;
     private String cvv;
+    private String direccionEnvio;
 }

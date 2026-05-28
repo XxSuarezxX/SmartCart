@@ -11,6 +11,10 @@ import java.util.Optional;
 @Service
 public class UsuarioService {
 
+    public java.util.List<Usuario> listarTodos() {
+    return usuarioRepository.findAll();
+}
+
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil; // Añadimos la utilidad del token
@@ -40,10 +44,12 @@ public class UsuarioService {
         Usuario usuario = usuarioOpt.get();
         if (passwordEncoder.matches(password, usuario.getPassword())) {
             String token = jwtUtil.generarToken(usuario);
-            return new LoginResponse(token, usuario.getNombre(), usuario.getRol().name());
+            return new LoginResponse(usuario.getId(), token, usuario.getNombre(), usuario.getRol().name());
         }
     }
 
     throw new RuntimeException("Credenciales incorrectas");
 }
+
+
 }

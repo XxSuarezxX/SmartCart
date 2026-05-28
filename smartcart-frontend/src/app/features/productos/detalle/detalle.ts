@@ -5,6 +5,7 @@ import { ProductoService } from '../../../core/services/producto';
 import { InteraccionService } from '../../../core/services/interaccion';
 import { AuthService } from '../../../core/services/auth';
 import { PrecioPipe } from '../../../shared/pipes/precio-pipe';
+import { CarritoService } from '../../../core/services/carrito';
 
 @Component({
   selector: 'app-detalle',
@@ -28,6 +29,7 @@ export class DetalleComponent implements OnInit {
     private productoService: ProductoService,
     private interaccionService: InteraccionService,
     private authService: AuthService,
+    private carritoService: CarritoService,
     private cdr: ChangeDetectorRef
   ) { }
 
@@ -42,8 +44,8 @@ export class DetalleComponent implements OnInit {
         this.tallas = data.tallas ? data.tallas.split(',').map((t: string) => t.trim()) : [];
         if (this.colores.length > 0) this.colorSeleccionado = this.colores[0];
         this.cargando = false;
-          console.log('Producto recibido:', data);
-          this.producto = data;
+        console.log('Producto recibido:', data);
+        this.producto = data;
         console.log('URL imagen:', data.urlImagen);
         this.producto = data;
         this.cdr.detectChanges();
@@ -101,21 +103,17 @@ export class DetalleComponent implements OnInit {
       alert('Selecciona una talla');
       return;
     }
-    const carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
-    const existe = carrito.find((p: any) => p.id === this.producto.id && p.talla === this.tallaSeleccionada && p.color === this.colorSeleccionado);
-    if (existe) {
-      existe.cantidad++;
-    } else {
-      carrito.push({
-        ...this.producto,
-        cantidad: 1,
-        talla: this.tallaSeleccionada,
-        color: this.colorSeleccionado
-      });
-    }
-    localStorage.setItem('carrito', JSON.stringify(carrito));
-    this.router.navigate(['/carrito']);
+    const userId = this.authService.getUserId();
+    this.carritoService.agregarProducto(userId, this.producto.id, 1).subscribe({
+      next: () => {
+        this.router.navigate(['/carrito']);
+      },
+      error: () => {
+        alert('Error al agregar al carrito');
+      }
+    });
   }
+
 
   getColorHex(color: string): string {
     const colores: { [key: string]: string } = {

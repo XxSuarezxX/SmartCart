@@ -46,6 +46,8 @@ public class SeguridadConfig {
                         .requestMatchers("/api/interacciones/sugeridos/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/productos/cargar-csv").permitAll() // <-- PRIMERO LA ESPECÍFICA
                         .requestMatchers(HttpMethod.GET, "/productos/**").permitAll()          // <-- LUEGO LA GENERAL
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/auth/usuarios").hasAuthority("ADMIN")
                         .anyRequest().authenticated())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

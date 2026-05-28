@@ -35,13 +35,14 @@ public class JwtFilter extends OncePerRequestFilter {
             if (jwtUtil.esTokenValido(token)) {
                 String email = jwtUtil.extraerUsername(token);
                 String rol = jwtUtil.extraerRol(token);
+                String authority = (rol != null && rol.startsWith("ROLE_")) ? rol : "ROLE_" + rol;
 
                 System.out.println("=== JWT FILTER ===");
                 System.out.println("Email: " + email);
                 System.out.println("Rol extraido: " + rol);
+                System.out.println("Authority normalizada: " + authority);
 
-                List<SimpleGrantedAuthority> authorities = List.of(
-                        new SimpleGrantedAuthority(rol));
+                List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(authority));
 
                 UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                         email, null, authorities

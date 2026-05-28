@@ -8,6 +8,7 @@ import { CatalogoComponent } from './features/productos/catalogo/catalogo';
 import { MiCuentaComponent } from './features/cuenta/mi-cuenta/mi-cuenta';
 import { RecomendadosComponent } from './features/recomendados/recomendados/recomendados';
 import { DetalleComponent } from './features/productos/detalle/detalle';
+import { CarritoComponent } from './features/carrito/carrito/carrito';
 
 
 export const routes: Routes = [
@@ -19,5 +20,6 @@ export const routes: Routes = [
   { path: 'mi-cuenta', component: MiCuentaComponent },
   { path: 'recomendados', component: RecomendadosComponent },
   { path: 'producto/:id', component: DetalleComponent },
+  { path: 'carrito', component: CarritoComponent },
   { path: '**', redirectTo: '' }
 ];

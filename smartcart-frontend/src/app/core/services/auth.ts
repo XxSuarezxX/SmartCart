@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -51,4 +52,16 @@ export class AuthService {
     localStorage.removeItem('username');
     localStorage.removeItem('rol');
   }
+
+  getUsuarios(): Observable<any[]> {
+  return this.http.get<any[]>(`${this.apiUrl}/api/auth/usuarios`, {
+    headers: this.getHeaders()
+  });
+}
+
+private getHeaders(): HttpHeaders {
+  return new HttpHeaders({
+    Authorization: `Bearer ${this.getToken()}`
+  });
+}
 }

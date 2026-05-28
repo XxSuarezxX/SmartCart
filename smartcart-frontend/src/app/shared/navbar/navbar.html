@@ -13,7 +13,7 @@
       <li routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Inicio</li>
       <li routerLink="/catalogo" routerLinkActive="active">Catálogo</li>
       <li routerLink="/recomendados" routerLinkActive="active">Recomendados</li>
-      <li *ngIf="isLoggedIn" routerLink="/mis-compras" routerLinkActive="active">Mis Compras</li>
+      <li *ngIf="isLoggedIn && !isAdmin" routerLink="/mi-cuenta" routerLinkActive="active">Mis Compras</li>
     </ul>
   </div>
 
@@ -37,7 +37,7 @@
         <span class="badge">{{ likesCount }}</span>
       </div>
 
-      <div class="icon-btn" *ngIf="isLoggedIn && !isAdmin">
+      <div class="icon-btn" *ngIf="isLoggedIn && !isAdmin" routerLink="/carrito" style="cursor:pointer">
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2">
           <circle cx="9" cy="21" r="1" />
@@ -64,7 +64,7 @@
           <ng-container *ngIf="isLoggedIn">
             <ng-container *ngIf="!isAdmin">
               <a routerLink="/mi-cuenta">Mi perfil</a>
-              <a routerLink="/mis-compras">Mis compras</a>
+              <a routerLink="/mi-cuenta">Mis compras</a>
             </ng-container>
             <ng-container *ngIf="isAdmin">
               <a routerLink="/admin">Panel Admin</a>

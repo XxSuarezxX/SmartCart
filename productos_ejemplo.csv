@@ -1,0 +1,6 @@
+descripcion,nombre,precio,stock,url_imagen,categoria_id,colores,tallas
+Camiseta algodón premium,Camiseta Oversize Black,85000,50,https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500,1,Negro-Gris,S-M-L
+Saco tejido a mano,Saco Crochet Artesanal,140000,15,https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=500,2,Beige-Cafe,M-L
+Jean clásico slim fit,Jean Azul Urbano,120000,30,https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=500,3,Azul Oscuro,30-32-34
+Chaqueta impermeable deportiva,Chaqueta WindRunner,180000,20,https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500,4,Negro-Rojo,M-L-XL
+Vestido casual elegante,Vestido Summer Style,160000,25,https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=500,5,Blanco-Rosa,S-M

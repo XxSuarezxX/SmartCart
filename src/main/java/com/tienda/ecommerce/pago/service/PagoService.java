@@ -1,5 +1,13 @@
 package com.tienda.ecommerce.pago.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.tienda.ecommerce.carrito.model.Carrito;
 import com.tienda.ecommerce.carrito.service.CarritoService;
 import com.tienda.ecommerce.pago.dto.PagoRequest;
@@ -9,14 +17,7 @@ import com.tienda.ecommerce.recomendacion.model.Interaccion;
 import com.tienda.ecommerce.recomendacion.service.RecomendacionService;
 import com.tienda.ecommerce.usuarios.model.Usuario;
 import com.tienda.ecommerce.usuarios.repository.UsuarioRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.List;
-
+import com.tienda.ecommerce.pago.model.PagoItem;
 @Service
 public class PagoService {
 
@@ -40,6 +41,10 @@ public class PagoService {
         this.emailService = emailService;
     }
 
+    public List<Pago> historialPorUsuario(Long usuarioId) {
+    return pagoRepository.findByUsuarioId(usuarioId);
+}
+
     @Transactional
     public Pago procesarPago(PagoRequest request) {
         // 1. Buscar los items del carrito del usuario
@@ -62,7 +67,18 @@ public class PagoService {
         pago.setMontoTotal(total);
         pago.setFechaPago(LocalDateTime.now());
         pago.setEstado("EXITOSO");
+        pago.setDireccionEnvio(request.getDireccionEnvio());
 
+
+        for (Carrito item : items) {
+            PagoItem pagoItem = new PagoItem();
+            pagoItem.setPago(pago);
+            pagoItem.setNombreProducto(item.getProducto().getNombre());
+            pagoItem.setPrecioUnitario(item.getProducto().getPrecio());
+            pagoItem.setCantidad(item.getCantidad());
+            pagoItem.setUrlImagen(item.getProducto().getUrlImagen());
+            pago.getItems().add(pagoItem);
+        }
         for (Carrito item : items) {
             Interaccion nuevaInteraccion = new Interaccion();
             nuevaInteraccion.setUsuarioId(usuario.getId());
