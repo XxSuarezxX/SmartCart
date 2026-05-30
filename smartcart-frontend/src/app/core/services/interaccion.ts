@@ -4,7 +4,7 @@ import { AuthService } from './auth';
 
 @Injectable({ providedIn: 'root' })
 export class InteraccionService {
-  private apiUrl = 'http://localhost:8080';
+  private apiUrl = '';
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 

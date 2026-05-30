@@ -31,7 +31,7 @@ public class SeguridadConfig {
         http.csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedOrigins(List.of("http://localhost:4200"));
+                    config.setAllowedOrigins(List.of("http://localhost:4200", "http://localhost:8080"));
                     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                     config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "X-Requested-With"));
                     config.setExposedHeaders(List.of("Authorization"));
@@ -40,6 +40,12 @@ public class SeguridadConfig {
                 }))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/", "/index.html", "/favicon.ico",
+                                "/*.js", "/*.css", "/*.map", "/*.txt", "/*.json",
+                                "/assets/**", "/media/**").permitAll()
+                        .requestMatchers("/login", "/registro", "/catalogo",
+                                "/mi-cuenta", "/recomendados", "/carrito",
+                                "/producto/**", "/admin").permitAll()
                         .requestMatchers("/usuarios/**", "/api/auth/**").permitAll()
                         .requestMatchers("/api/pagos/**").permitAll() // <-- AGREGAMOS ESTA LÍNEA
                         .requestMatchers("/api/interacciones/registrar").permitAll()
