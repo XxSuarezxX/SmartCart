@@ -12,12 +12,13 @@ import com.tienda.ecommerce.carrito.model.Carrito;
 import com.tienda.ecommerce.carrito.service.CarritoService;
 import com.tienda.ecommerce.pago.dto.PagoRequest;
 import com.tienda.ecommerce.pago.model.Pago;
+import com.tienda.ecommerce.pago.model.PagoItem;
 import com.tienda.ecommerce.pago.repository.PagoRepository;
+import com.tienda.ecommerce.productos.repository.ProductoRepository;
 import com.tienda.ecommerce.recomendacion.model.Interaccion;
 import com.tienda.ecommerce.recomendacion.service.RecomendacionService;
 import com.tienda.ecommerce.usuarios.model.Usuario;
 import com.tienda.ecommerce.usuarios.repository.UsuarioRepository;
-import com.tienda.ecommerce.pago.model.PagoItem;
 @Service
 public class PagoService {
 
@@ -29,16 +30,19 @@ public class PagoService {
     private final RecomendacionService recomendacionService;
     private final ReciboPdfService reciboPdfService;
     private final EmailService emailService;
+    private final ProductoRepository productoRepository;
 
     public PagoService(PagoRepository pagoRepository, CarritoService carritoService,
                        UsuarioRepository usuarioRepository, RecomendacionService recomendacionService,
-                       ReciboPdfService reciboPdfService, EmailService emailService) {
+                       ReciboPdfService reciboPdfService, EmailService emailService,
+                       ProductoRepository productoRepository) {
         this.pagoRepository = pagoRepository;
         this.carritoService = carritoService;
         this.usuarioRepository = usuarioRepository;
         this.recomendacionService = recomendacionService;
         this.reciboPdfService = reciboPdfService;
         this.emailService = emailService;
+        this.productoRepository = productoRepository;
     }
 
     public List<Pago> historialPorUsuario(Long usuarioId) {
@@ -78,6 +82,13 @@ public class PagoService {
             pagoItem.setCantidad(item.getCantidad());
             pagoItem.setUrlImagen(item.getProducto().getUrlImagen());
             pago.getItems().add(pagoItem);
+        }
+        // 4. Actualizar stock de productos comprados
+        for (Carrito item : items) {
+            var producto = item.getProducto();
+            int nuevaCantidad = (producto.getStock() == null ? 0 : producto.getStock()) - item.getCantidad();
+            producto.setStock(Math.max(0, nuevaCantidad));
+            productoRepository.save(producto);
         }
         for (Carrito item : items) {
             Interaccion nuevaInteraccion = new Interaccion();

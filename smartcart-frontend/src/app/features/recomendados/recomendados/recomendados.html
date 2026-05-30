@@ -28,8 +28,10 @@
         <div class="card-img-wrapper">
           <img [src]="p.urlImagen" [alt]="p.nombre" onerror="this.src='https://placehold.co/300x400?text=Sin+imagen'">
           <button class="like-btn" (click)="toggleLike($event, p)" [class.liked]="p.liked">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" [attr.fill]="p.liked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+              [attr.fill]="p.liked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2">
+              <path
+                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
             </svg>
           </button>
         </div>
@@ -45,8 +47,10 @@
   <!-- Sin recomendaciones aún -->
   <section class="rec-section" *ngIf="!cargando && isLoggedIn && recomendados.length === 0">
     <div class="empty-state">
-      <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+      <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="1">
+        <path
+          d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
       </svg>
       <h3>Aún no tenemos recomendaciones para ti</h3>
       <p>Dale like a productos que te gusten y te recomendaremos más como esos</p>
@@ -61,12 +65,15 @@
       <p class="section-sub">Lo más visto en SmartCart</p>
     </div>
     <div class="grid">
-      <div class="card" *ngFor="let p of productosPopulares" (click)="irADetalle(p.id)">
+      <div class="card" *ngFor="let p of productosPopulares" (click)="irADetalle(p.id)">a
         <div class="card-img-wrapper">
-          <img [src]="p.url_imagen" [alt]="p.nombre" onerror="this.src='https://placehold.co/300x400?text=Sin+imagen'">
+          <img [src]="getPrimeraImagen(p.urlImagen)" [alt]="p.nombre"
+            onerror="this.src='https://placehold.co/300x400?text=Sin+imagen'">
           <button class="like-btn" (click)="toggleLike($event, p)">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
+              <path
+                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
             </svg>
           </button>
         </div>

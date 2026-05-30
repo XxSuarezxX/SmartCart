@@ -1,22 +1,22 @@
 package com.tienda.ecommerce.productos.service;
 
-import com.tienda.ecommerce.productos.model.Categoria;
-import com.tienda.ecommerce.productos.model.Producto;
-import com.tienda.ecommerce.productos.repository.CategoriaRepository;
-import com.tienda.ecommerce.productos.repository.ProductoRepository;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.tienda.ecommerce.productos.model.Categoria;
+import com.tienda.ecommerce.productos.model.Producto;
+import com.tienda.ecommerce.productos.repository.CategoriaRepository;
+import com.tienda.ecommerce.productos.repository.ProductoRepository;
 
 @ExtendWith(MockitoExtension.class)
 class ProductoServiceTest {
@@ -92,12 +92,39 @@ class ProductoServiceTest {
     void guardarCategoria_persiste() {
         Categoria c = new Categoria();
         c.setNombre("Oversize");
+        when(categoriaRepository.findAll()).thenReturn(List.of());
         when(categoriaRepository.save(c)).thenReturn(c);
 
         Categoria guardada = productoService.guardarCategoria(c);
 
         assertThat(guardada.getNombre()).isEqualTo("Oversize");
+        assertThat(guardada.getId()).isEqualTo(1L);
         verify(categoriaRepository).save(c);
+    }
+
+    @Test
+    @DisplayName("guardarCategoria() rellena el primer ID libre")
+    void guardarCategoria_rellenaIdLibre() {
+        Categoria c = new Categoria();
+        c.setNombre("New Era");
+        when(categoriaRepository.findAll()).thenReturn(List.of(
+                categoriaConId(1L),
+                categoriaConId(3L),
+                categoriaConId(4L)
+        ));
+        when(categoriaRepository.save(c)).thenReturn(c);
+
+        Categoria guardada = productoService.guardarCategoria(c);
+
+        assertThat(guardada.getId()).isEqualTo(2L);
+        verify(categoriaRepository).save(c);
+    }
+
+    private Categoria categoriaConId(Long id) {
+        Categoria c = new Categoria();
+        c.setId(id);
+        c.setNombre("Cat " + id);
+        return c;
     }
 
     @Test

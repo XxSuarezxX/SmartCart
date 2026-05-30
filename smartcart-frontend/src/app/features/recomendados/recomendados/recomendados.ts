@@ -76,6 +76,11 @@ export class RecomendadosComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
+  getPrimeraImagen(urlImagen: string): string {
+    if (!urlImagen) return '';
+    return urlImagen.split(',')[0].trim();
+  }
+
   irACatalogo() {
     this.router.navigate(['/catalogo']);
   }

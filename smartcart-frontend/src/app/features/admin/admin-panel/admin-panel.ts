@@ -35,12 +35,14 @@ export class AdminPanelComponent implements OnInit {
   error = '';
   exitoCategoria = '';
   errorCategoria = '';
+  resultadoEliminar: { mensaje?: string; productos?: string[] } = {};
 
   // CSV
   archivoCSV: File | null = null;
   exitoCSV = '';
   errorCSV = '';
   cargandoCSV = false;
+  private dashboardInterval: any = null;
 
   constructor(
     private authService: AuthService,
@@ -49,7 +51,7 @@ export class AdminPanelComponent implements OnInit {
     private router: Router,
     private cdr: ChangeDetectorRef,
     private http: HttpClient
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.adminName = this.authService.getUsername() || 'Admin';
@@ -66,6 +68,7 @@ export class AdminPanelComponent implements OnInit {
     this.adminService.getDashboard().subscribe({
       next: (data) => {
         this.dashboard = data;
+        this.ranking = data?.topProductos || [];
         this.cdr.detectChanges();
       },
       error: (err) => console.error('Error dashboard:', err)
@@ -86,14 +89,35 @@ export class AdminPanelComponent implements OnInit {
         this.categorias = data;
         this.cdr.detectChanges();
       },
-      error: () => {}
+      error: () => { }
     });
   }
 
   setSeccion(s: string) {
     this.seccionActiva = s;
-    if (s === 'dashboard') this.cargarDashboard();
+    if (s === 'dashboard') {
+      this.cargarDashboard();
+      this.cargarProductos();
+      if (!this.dashboardInterval) {
+        this.dashboardInterval = setInterval(() => {
+          this.cargarDashboard();
+          this.cargarProductos();
+        }, 7000);
+      }
+    } else {
+      if (this.dashboardInterval) {
+        clearInterval(this.dashboardInterval);
+        this.dashboardInterval = null;
+      }
+    }
     this.cdr.detectChanges();
+  }
+
+  ngOnDestroy() {
+    if (this.dashboardInterval) {
+      clearInterval(this.dashboardInterval);
+      this.dashboardInterval = null;
+    }
   }
 
   crearProducto() {
@@ -110,6 +134,21 @@ export class AdminPanelComponent implements OnInit {
   }
 
   crearCategoria() {
+    // Verificar token y rol antes de enviar
+    if (!this.authService.isLoggedIn()) {
+      this.errorCategoria = 'No autenticado: inicia sesión como administrador';
+      this.exitoCategoria = '';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    if (!this.authService.isAdmin()) {
+      this.errorCategoria = 'No autorizado: necesitas rol ADMIN';
+      this.exitoCategoria = '';
+      this.cdr.detectChanges();
+      return;
+    }
+
     this.productoService.crearCategoria(this.nuevaCategoria).subscribe({
       next: () => {
         this.exitoCategoria = 'Categoría creada';
@@ -118,7 +157,15 @@ export class AdminPanelComponent implements OnInit {
         this.cargarCategorias();
         this.cdr.detectChanges();
       },
-      error: () => { this.errorCategoria = 'Error al crear categoría'; this.exitoCategoria = ''; this.cdr.detectChanges(); }
+      error: (err: any) => {
+        if (err?.status === 403) {
+          this.errorCategoria = 'Servidor: no autorizado para crear categorías';
+        } else {
+          this.errorCategoria = 'Error al crear categoría';
+        }
+        this.exitoCategoria = '';
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -126,15 +173,62 @@ export class AdminPanelComponent implements OnInit {
     if (!confirm('¿Eliminar este producto?')) return;
     this.productoService.eliminarProducto(id).subscribe({
       next: () => { this.cargarProductos(); this.cdr.detectChanges(); },
-      error: () => {}
+      error: () => { }
     });
   }
 
-  eliminarCategoria(id: number) {
-    if (!confirm('¿Eliminar esta categoría?')) return;
+  eliminarCategoria(id: number, nombre: string) {
+    const productosDeCategoria = this.productos.filter(p => p.categoria?.id === id);
+    const cantidad = productosDeCategoria.length;
+    let confirmMsg = `¿Estás seguro de eliminar la categoría "${nombre}"?`;
+
+    if (cantidad > 0) {
+      const nombres = productosDeCategoria.slice(0, 5).map(p => `- ${p.nombre}`).join('\n');
+      const sufijo = cantidad > 5 ? `\n- y ${cantidad - 5} más` : '';
+      confirmMsg += `\n\nSe eliminarán ${cantidad} productos de esta categoría:\n${nombres}${sufijo}`;
+    } else {
+      confirmMsg += `\n\nNo hay productos asociados con esta categoría.`;
+    }
+
+    if (!confirm(confirmMsg)) return;
+
     this.productoService.eliminarCategoria(id).subscribe({
-      next: () => { this.cargarCategorias(); this.cdr.detectChanges(); },
-      error: () => {}
+      next: (response: any) => {
+        const text = typeof response === 'string' ? response : JSON.stringify(response);
+        this.exitoCategoria = text;
+        this.errorCategoria = '';
+        // parse response to extract product list if present
+        const idx = text.indexOf('Productos:');
+        if (idx >= 0) {
+          const mensaje = text.substring(0, idx).trim();
+          const listaRaw = text.substring(idx + 'Productos:'.length).trim();
+          const productos = listaRaw.split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+          this.resultadoEliminar = { mensaje, productos };
+        } else {
+          this.resultadoEliminar = { mensaje: text };
+        }
+        this.cargarCategorias();
+        this.cargarProductos();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error al eliminar categoría:', err);
+        const backendMessage = typeof err.error === 'string' && err.error.trim() ? err.error : null;
+        const text = backendMessage || ('Error al eliminar categoría');
+        this.errorCategoria = text;
+        // try to parse products from backend error message as well
+        const idx = text.indexOf('Productos:');
+        if (idx >= 0) {
+          const mensaje = text.substring(0, idx).trim();
+          const listaRaw = text.substring(idx + 'Productos:'.length).trim();
+          const productos = listaRaw.split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+          this.resultadoEliminar = { mensaje, productos };
+        } else {
+          this.resultadoEliminar = { mensaje: text };
+        }
+        this.exitoCategoria = '';
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -145,13 +239,17 @@ export class AdminPanelComponent implements OnInit {
   }
 
   guardarEdicion() {
-    this.productoService.editarProducto(this.productoEditando, this.productoEditando.id).subscribe({
+    this.productoService.editarProducto(this.productoEditando.id, this.productoEditando).subscribe({
       next: () => {
         this.mostrarModalEditar = false;
+        this.productoEditando = null;
         this.cargarProductos();
         this.cdr.detectChanges();
       },
-      error: () => {}
+      error: () => {
+        this.error = 'Error al editar el producto';
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -227,5 +325,5 @@ export class AdminPanelComponent implements OnInit {
     this.router.navigate(['/login']);
   }
 
-  
+
 }

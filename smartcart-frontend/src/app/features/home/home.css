@@ -223,3 +223,9 @@ button:hover {
 .color-dot:hover {
   transform: scale(1.2);
 }
+
+.color-dot.activo {
+  outline: 2px solid var(--terra);
+  outline-offset: 2px;
+  transform: scale(1.2);
+}

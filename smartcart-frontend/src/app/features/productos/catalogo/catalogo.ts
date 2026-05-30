@@ -96,6 +96,11 @@ export class CatalogoComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
+  getPrimeraImagen(urlImagen: string): string {
+    if (!urlImagen) return '';
+    return urlImagen.split(',')[0].trim();
+  }
+
   agregarCarrito(producto: any) {
     const carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
     const existe = carrito.find((p: any) => p.id === producto.id);

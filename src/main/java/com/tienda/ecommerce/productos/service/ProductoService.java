@@ -16,6 +16,10 @@ import com.tienda.ecommerce.productos.model.Producto;
 import com.tienda.ecommerce.productos.repository.CategoriaRepository;
 import com.tienda.ecommerce.productos.repository.ProductoRepository;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+
+
 @Service
 public class ProductoService {
 
@@ -32,13 +36,46 @@ public class ProductoService {
 
     // --- LÓGICA DE CATEGORÍAS ---
 
-    public Categoria guardarCategoria(Categoria categoria) {
-        return categoriaRepository.save(categoria);
+
+    @PersistenceContext
+private EntityManager entityManager;
+
+    @Transactional
+public Categoria guardarCategoria(Categoria categoria) {
+    Long idLibre = buscarPrimerIdLibre();
+    entityManager.createNativeQuery(
+        "INSERT INTO categorias (id, nombre) VALUES (:id, :nombre)")
+        .setParameter("id", idLibre)
+        .setParameter("nombre", categoria.getNombre())
+        .executeUpdate();
+    categoria.setId(idLibre);
+    return categoria;
+}
+
+    private Long buscarPrimerIdLibre() {
+        long idLibre = 1L;
+        List<Long> ids = categoriaRepository.findAll().stream()
+                .map(Categoria::getId)
+                .filter(id -> id != null && id > 0)
+                .sorted()
+                .toList();
+
+        for (Long id : ids) {
+            if (id > idLibre) {
+                break;
+            }
+            if (id.equals(idLibre)) {
+                idLibre++;
+            }
+        }
+        return idLibre;
     }
 
     public List<Categoria> listarCategorias() {
-        return categoriaRepository.findAll();
-    }
+    return categoriaRepository.findAll().stream()
+        .sorted((a, b) -> Long.compare(a.getId(), b.getId()))
+        .toList();
+}
 
     // --- LÓGICA DE PRODUCTOS ---
 
@@ -55,8 +92,31 @@ public class ProductoService {
         return productoRepository.save(producto);
     }
 
-    public void eliminarProducto(Long id) {
-        productoRepository.deleteById(id);
+    @Transactional
+public void eliminarProducto(Long id) {
+    entityManager.createNativeQuery("DELETE FROM carrito WHERE producto_id = :id")
+        .setParameter("id", id)
+        .executeUpdate();
+    productoRepository.deleteById(id);
+}
+
+    public String eliminarCategoriaConProductos(Long categoriaId) {
+        Categoria categoria = categoriaRepository.findById(categoriaId)
+                .orElseThrow(() -> new RuntimeException("Categoría no encontrada: " + categoriaId));
+
+        List<Producto> productos = productoRepository.findByCategoriaId(categoriaId);
+        List<String> nombresProductos = productos.stream().map(Producto::getNombre).toList();
+
+        productoRepository.deleteAll(productos);
+        categoriaRepository.delete(categoria);
+
+        StringBuilder resumen = new StringBuilder();
+        resumen.append("Categoría '").append(categoria.getNombre()).append("' eliminada.");
+        resumen.append(" Se eliminaron ").append(productos.size()).append(" producto(s).");
+        if (!nombresProductos.isEmpty()) {
+            resumen.append(" Productos: ").append(String.join(", ", nombresProductos));
+        }
+        return resumen.toString();
     }
 
     @Transactional

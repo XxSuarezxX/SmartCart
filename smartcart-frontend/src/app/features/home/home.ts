@@ -34,7 +34,12 @@ export class HomeComponent implements OnInit {
 
   ngOnInit() {
     this.productoService.getProductos().subscribe(data => {
-      this.productos = data.map(p => ({ ...p, liked: false }));
+      this.productos = data.map(p => ({
+        ...p,
+        liked: false,
+        colorActivo: p.colores ? p.colores.split(',')[0].trim() : '',
+        imagenActiva: 0
+      }));
       this.filtrar();
       this.cdr.detectChanges();
     });
@@ -71,30 +76,48 @@ export class HomeComponent implements OnInit {
   }
 
   agregarCarrito(producto: any) {
-  if (!this.authService.isLoggedIn()) {
-    this.router.navigate(['/login']);
-    return;
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/login']);
+      return;
+    }
+    const userId = this.authService.getUserId();
+    // Lo agregamos via backend
+    import('../../core/services/carrito').then(m => {
+      // Por ahora navegamos al detalle para agregar
+      this.router.navigate(['/producto', producto.id]);
+    });
   }
-  const userId = this.authService.getUserId();
-  // Lo agregamos via backend
-  import('../../core/services/carrito').then(m => {
-    // Por ahora navegamos al detalle para agregar
-    this.router.navigate(['/producto', producto.id]);
-  });
+
+  getPrimeraImagen(urlImagen: string): string {
+    if (!urlImagen) return '';
+    return urlImagen.split(',')[0].trim();
+  }
+
+  getPrimeraImagenPorIndice(urlImagen: string, index: number): string {
+  if (!urlImagen) return '';
+  const imagenes = urlImagen.split(',').map(u => u.trim());
+  return imagenes[index] || imagenes[0] || '';
 }
 
+  cambiarColorTarjeta(evento: Event, producto: any, color: string, index: number) {
+    evento.stopPropagation();
+    producto.colorActivo = color;
+    producto.imagenActiva = index;
+    this.cdr.detectChanges();
+  }
+
   getColorHex(color: string): string {
-  const colores: { [key: string]: string } = {
-    'Negro': '#1a1a1a',
-    'Blanco': '#f5f5f5',
-    'Gris': '#808080',
-    'Café': '#8B4513',
-    'Azul': '#1e3a8a',
-    'Azul Navy': '#1e3a8a',
-    'Verde Oliva': '#556B2F',
-    'Rojo': '#dc2626',
-    'Rosa': '#ec4899',
-  };
-  return colores[color] || '#888';
-}
+    const colores: { [key: string]: string } = {
+      'Negro': '#1a1a1a',
+      'Blanco': '#f5f5f5',
+      'Gris': '#808080',
+      'Café': '#8B4513',
+      'Azul': '#1e3a8a',
+      'Azul Navy': '#1e3a8a',
+      'Verde Oliva': '#556B2F',
+      'Rojo': '#dc2626',
+      'Rosa': '#ec4899',
+    };
+    return colores[color] || '#888';
+  }
 }

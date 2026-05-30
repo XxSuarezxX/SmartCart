@@ -22,6 +22,8 @@ export class DetalleComponent implements OnInit {
   tallaSeleccionada = '';
   liked = false;
   cargando = true;
+  imagenes: string[] = [];
+  imagenActiva = 0;
 
   constructor(
     private route: ActivatedRoute,
@@ -43,11 +45,18 @@ export class DetalleComponent implements OnInit {
         this.colores = data.colores ? data.colores.split(',').map((c: string) => c.trim()) : [];
         this.tallas = data.tallas ? data.tallas.split(',').map((t: string) => t.trim()) : [];
         if (this.colores.length > 0) this.colorSeleccionado = this.colores[0];
+        if (this.imagenes.length > 0) this.imagenActiva = 0;
+        this.tallas = data.tallas ? data.tallas.split(',').map((t: string) => t.trim()) : [];
+        if (this.colores.length > 0) this.colorSeleccionado = this.colores[0];
         this.cargando = false;
         console.log('Producto recibido:', data);
         this.producto = data;
         console.log('URL imagen:', data.urlImagen);
         this.producto = data;
+        this.imagenes = data.urlImagen
+          ? data.urlImagen.split(',').map((url: string) => url.trim()).filter((url: string) => url.length > 0)
+          : [];
+        if (this.imagenes.length === 0) this.imagenes = [''];
         this.cdr.detectChanges();
       },
       error: () => {
@@ -60,6 +69,10 @@ export class DetalleComponent implements OnInit {
 
   seleccionarColor(color: string) {
     this.colorSeleccionado = color;
+    const index = this.colores.indexOf(color);
+    if (index !== -1 && index < this.imagenes.length) {
+      this.imagenActiva = index;
+    }
     this.cdr.detectChanges();
   }
 
@@ -112,6 +125,21 @@ export class DetalleComponent implements OnInit {
         alert('Error al agregar al carrito');
       }
     });
+  }
+
+  imagenAnterior() {
+    this.imagenActiva = this.imagenActiva > 0 ? this.imagenActiva - 1 : this.imagenes.length - 1;
+    this.cdr.detectChanges();
+  }
+
+  imagenSiguiente() {
+    this.imagenActiva = this.imagenActiva < this.imagenes.length - 1 ? this.imagenActiva + 1 : 0;
+    this.cdr.detectChanges();
+  }
+
+  seleccionarImagen(index: number) {
+    this.imagenActiva = index;
+    this.cdr.detectChanges();
   }
 
 

@@ -93,17 +93,17 @@
       <div class="metricas-grid">
         <div class="metrica-card">
           <span class="metrica-label">Ingresos Totales</span>
-          <span class="metrica-valor">$0</span>
-          <span class="metrica-sub">Pagos exitosos</span>
+          <span class="metrica-valor">{{ dashboard?.ingresosTotales | precio }}</span>
+          <span class="metrica-sub">Ingresados</span>
         </div>
         <div class="metrica-card">
           <span class="metrica-label">Compras</span>
-          <span class="metrica-valor">0</span>
-          <span class="metrica-sub">Total transacciones</span>
+          <span class="metrica-valor">{{ dashboard?.totalPagos || 0 }}</span>
+          <span class="metrica-sub">Pagos Exitosos</span>
         </div>
         <div class="metrica-card">
           <span class="metrica-label">Clientes</span>
-          <span class="metrica-valor">{{ usuarios.length }}</span>
+          <span class="metrica-valor">{{ dashboard?.totalClientes || 0 }}</span>
           <span class="metrica-sub verde">Registrados</span>
         </div>
         <div class="metrica-card">
@@ -131,8 +131,14 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
+              <tr *ngIf="!(dashboard?.pagosRecientes?.length > 0)">
                 <td colspan="4" class="tabla-vacia">No hay compras registradas aún</td>
+              </tr>
+              <tr *ngFor="let pago of dashboard?.pagosRecientes">
+                <td>{{ pago.clienteNombre }}<br><small>{{ pago.clienteEmail }}</small></td>
+                <td>{{ pago.monto | precio }}</td>
+                <td>{{ pago.estado }}</td>
+                <td>{{ pago.fecha }}</td>
               </tr>
             </tbody>
           </table>
@@ -152,18 +158,21 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let u of usuarios">
+              <tr *ngIf="!(dashboard?.clientesRecientes?.length > 0)">
+                <td colspan="3" class="tabla-vacia">No hay clientes recientes</td>
+              </tr>
+              <tr *ngFor="let u of dashboard?.clientesRecientes">
                 <td>
                   <div class="tabla-usuario">
-                    <div class="avatar-mini">{{ u.nombre.charAt(0) }}</div>
+                    <div class="avatar-mini">{{ u.nombre?.charAt(0) || 'C' }}</div>
                     <div>
-                      <p>{{ u.nombre }}</p>
+                      <p>{{ u.nombre || 'Cliente nuevo' }}</p>
                       <span>{{ u.email }}</span>
                     </div>
                   </div>
                 </td>
-                <td>0</td>
-                <td>$0</td>
+                <td>{{ u.totalPagos }}</td>
+                <td>{{ u.totalGastado | precio }}</td>
               </tr>
             </tbody>
           </table>
@@ -178,7 +187,7 @@
         <div class="dash-card">
           <h3>Productos más vendidos</h3>
           <div *ngIf="ranking.length === 0" class="tabla-vacia">
-            <p>Aún no hay interacciones registradas</p>
+            <p>Aún no hay ventas registradas</p>
           </div>
           <div class="ranking-list" *ngIf="ranking.length > 0">
             <div class="ranking-item" *ngFor="let item of ranking; let i = index">
@@ -186,12 +195,12 @@
               <img [src]="item.urlImagen" [alt]="item.nombre" onerror="this.src='https://placehold.co/40x40?text=IMG'">
               <div class="ranking-info">
                 <p>{{ item.nombre }}</p>
-                <span>{{ item.categoria?.nombre }}</span>
+                <span *ngIf="item.urlImagen">Imagen disponible</span>
               </div>
               <div class="ranking-bar-wrapper">
-                <div class="ranking-bar" [style.width]="(item.puntos / (ranking[0].puntos || 1) * 100) + '%'"></div>
+                <div class="ranking-bar" [style.width]="(item.vendidos / (ranking[0].vendidos || 1) * 100) + '%'"></div>
               </div>
-              <span class="ranking-ventas">{{ item.puntos || 0 }}</span>
+              <span class="ranking-ventas">{{ item.vendidos || 0 }}</span>
             </div>
           </div>
         </div>
@@ -200,16 +209,34 @@
         <div class="dash-card">
           <h3>Actividad reciente</h3>
           <div class="actividad-lista">
-            <div class="actividad-item" *ngFor="let u of usuarios">
-              <div class="actividad-dot verde"></div>
-              <div>
-                <p><strong>{{ u.nombre }}</strong> se registró</p>
-                <span>Usuario activo</span>
+            <ng-container *ngIf="dashboard?.actividadReciente?.length > 0; else fallbackActividad">
+              <div class="actividad-item" *ngFor="let item of dashboard.actividadReciente">
+                <div class="actividad-dot verde"></div>
+                <div>
+                  <p><strong>{{ item.mensaje }}</strong></p>
+                  <span>{{ item.detalle }} • {{ item.fecha }}</span>
+                </div>
               </div>
-            </div>
-            <div class="actividad-vacia" *ngIf="usuarios.length === 0">
-              <p>Sin actividad reciente</p>
-            </div>
+            </ng-container>
+            <ng-template #fallbackActividad>
+              <div class="actividad-item" *ngFor="let pago of dashboard?.pagosRecientes">
+                <div class="actividad-dot verde"></div>
+                <div>
+                  <p><strong>Compra de {{ pago.clienteNombre }}</strong></p>
+                  <span>Monto: {{ pago.monto | precio }} • {{ pago.estado }} • {{ pago.fecha }}</span>
+                </div>
+              </div>
+              <div class="actividad-item" *ngFor="let cliente of dashboard?.clientesRecientes">
+                <div class="actividad-dot naranja"></div>
+                <div>
+                  <p><strong>Nuevo cliente: {{ cliente.nombre || cliente.email }}</strong></p>
+                  <span>{{ cliente.totalPagos }} compras • {{ cliente.totalGastado | precio }}</span>
+                </div>
+              </div>
+              <div class="actividad-vacia" *ngIf="!(dashboard?.pagosRecientes?.length > 0) && !(dashboard?.clientesRecientes?.length > 0)">
+                <p>Sin actividad reciente</p>
+              </div>
+            </ng-template>
           </div>
         </div>
       </div>
@@ -260,6 +287,12 @@
         <h3>Nueva Categoría</h3>
         <p class="msg-exito" *ngIf="exitoCategoria">{{ exitoCategoria }}</p>
         <p class="msg-error" *ngIf="errorCategoria">{{ errorCategoria }}</p>
+        <div class="delete-result" *ngIf="resultadoEliminar?.mensaje" style="margin-top:0.75rem; padding:0.75rem; border-radius:6px; background:#f7f9fc;">
+          <p style="margin:0 0 0.5rem 0; font-weight:600">{{ resultadoEliminar.mensaje }}</p>
+          <ul *ngIf="resultadoEliminar.productos?.length" style="margin:0; padding-left:1rem">
+            <li *ngFor="let p of resultadoEliminar.productos">{{ p }}</li>
+          </ul>
+        </div>
         <div class="field">
           <label>Nombre</label>
           <input type="text" placeholder="Nombre de la categoría" [(ngModel)]="nuevaCategoria.nombre" />
@@ -280,7 +313,7 @@
               <td>{{ cat.id }}</td>
               <td>{{ cat.nombre }}</td>
               <td>
-                <button class="btn-eliminar" (click)="eliminarCategoria(cat.id)">Eliminar</button>
+                <button class="btn-eliminar" (click)="eliminarCategoria(cat.id, cat.nombre)">Eliminar</button>
               </td>
             </tr>
           </tbody>

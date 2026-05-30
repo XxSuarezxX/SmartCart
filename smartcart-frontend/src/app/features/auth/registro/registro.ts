@@ -16,12 +16,13 @@ export class RegistroComponent {
   email = '';
   password = '';
   error = '';
-
+  mostrarPassword = false;
+  
   constructor(
     private authService: AuthService,
     private router: Router,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   onRegister() {
     this.authService.registro(this.nombre, this.email, this.password).subscribe({

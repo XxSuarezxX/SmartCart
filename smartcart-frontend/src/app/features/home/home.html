@@ -9,17 +9,18 @@
     <img src="https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=600" alt="Fashion" />
   </div>
 </section>
+
 <div class="home-container">
   <h2 class="titulo">Nueva Colección</h2>
   <div class="grid">
-    <div class="card" *ngFor="let p of productosFiltrados" (click)="irADetalle(p.id)">
+    <div class="card" *ngFor="let p of productos" (click)="irADetalle(p.id)">
       <div class="card-img-wrapper">
-        <img [src]="p.urlImagen" [alt]="p.nombre" onerror="this.src='https://placehold.co/300x400?text=Sin+imagen'">
+        <img [src]="getPrimeraImagenPorIndice(p.urlImagen, p.imagenActiva)" [alt]="p.nombre"
+          onerror="this.src='https://placehold.co/300x400?text=Sin+imagen'">
         <button class="like-btn" (click)="toggleLike($event, p)" [class.liked]="p.liked">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
             [attr.fill]="p.liked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2">
-            <path
-              d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
           </svg>
         </button>
       </div>
@@ -27,8 +28,9 @@
         <h3>{{ p.nombre }}</h3>
         <p class="categoria">{{ p.categoria?.nombre }}</p>
         <div class="colores-mini" *ngIf="p.colores">
-          <button *ngFor="let color of p.colores.split(',')" class="color-dot"
-            [style.background]="getColorHex(color.trim())" [title]="color.trim()" (click)="$event.stopPropagation()">
+          <button *ngFor="let color of p.colores.split(','); let i = index" class="color-dot"
+            [class.activo]="p.imagenActiva === i" [style.background]="getColorHex(color.trim())" [title]="color.trim()"
+            (click)="cambiarColorTarjeta($event, p, color.trim(), i)">
           </button>
         </div>
         <p class="precio">{{ p.precio | precio }}</p>

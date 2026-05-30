@@ -56,7 +56,8 @@ crearCategoria(categoria: any): Observable<any> {
 
 eliminarCategoria(id: number): Observable<any> {
   return this.http.delete(`${this.apiUrl}/productos/categorias/${id}`, {
-    headers: this.getHeaders()
+    headers: this.getHeaders(),
+    responseType: 'text'
   });
 }
 }

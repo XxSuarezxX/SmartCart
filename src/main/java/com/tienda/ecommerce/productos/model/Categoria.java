@@ -10,9 +10,8 @@ import lombok.Setter;
 public class Categoria {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String nombre; // Aquí irá "Oversize", "New Era", etc.
+    private String nombre;
 }
