@@ -1,0 +1,47 @@
+# Build outputs
+target/
+**/target/
+*.jar
+*.war
+
+# Node / Angular
+smartcart-frontend/node_modules/
+smartcart-frontend/dist/
+smartcart-frontend/.angular/
+smartcart-frontend/coverage/
+
+# Angular ya compilado en host (se regenera dentro del stage de build)
+src/main/resources/static/
+
+# IDE / Editor
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.classpath
+.project
+.settings/
+.factorypath
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Documentación / scripts
+README.md
+*.md

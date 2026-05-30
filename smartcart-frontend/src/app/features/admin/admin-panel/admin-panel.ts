@@ -285,7 +285,7 @@ export class AdminPanelComponent implements OnInit {
 
     const headers = new HttpHeaders({ Authorization: `Bearer ${this.authService.getToken()}` });
 
-    this.http.post('http://localhost:8080/productos/cargar-csv', formData, {
+    this.http.post('/productos/cargar-csv', formData, {
       headers,
       responseType: 'text'
     }).pipe(
