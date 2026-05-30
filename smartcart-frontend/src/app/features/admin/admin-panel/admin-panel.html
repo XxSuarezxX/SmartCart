@@ -233,7 +233,8 @@
                   <span>{{ cliente.totalPagos }} compras • {{ cliente.totalGastado | precio }}</span>
                 </div>
               </div>
-              <div class="actividad-vacia" *ngIf="!(dashboard?.pagosRecientes?.length > 0) && !(dashboard?.clientesRecientes?.length > 0)">
+              <div class="actividad-vacia"
+                *ngIf="!(dashboard?.pagosRecientes?.length > 0) && !(dashboard?.clientesRecientes?.length > 0)">
                 <p>Sin actividad reciente</p>
               </div>
             </ng-template>
@@ -287,7 +288,8 @@
         <h3>Nueva Categoría</h3>
         <p class="msg-exito" *ngIf="exitoCategoria">{{ exitoCategoria }}</p>
         <p class="msg-error" *ngIf="errorCategoria">{{ errorCategoria }}</p>
-        <div class="delete-result" *ngIf="resultadoEliminar?.mensaje" style="margin-top:0.75rem; padding:0.75rem; border-radius:6px; background:#f7f9fc;">
+        <div class="delete-result" *ngIf="resultadoEliminar?.mensaje"
+          style="margin-top:0.75rem; padding:0.75rem; border-radius:6px; background:#f7f9fc;">
           <p style="margin:0 0 0.5rem 0; font-weight:600">{{ resultadoEliminar.mensaje }}</p>
           <ul *ngIf="resultadoEliminar.productos?.length" style="margin:0; padding-left:1rem">
             <li *ngFor="let p of resultadoEliminar.productos">{{ p }}</li>
@@ -487,10 +489,9 @@
 
     <div class="form-card" style="margin-top:1.5rem;">
       <h3 style="color:var(--sand-dim); font-size:1.125rem; margin:0;">Ejemplo de CSV válido</h3>
-      <pre
-        class="csv-ejemplo">descripcion,nombre,precio,stock,url_imagen,categoria_id,colores,tallas
-Camiseta algodón premium,Camiseta Oversize Black,85000,50,https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500,1,Negro-Gris,S-M-L
-Saco tejido a mano,Saco Crochet Artesanal,140000,15,https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=500,2,Beige-Cafe,M-L</pre>
+      <pre class="csv-ejemplo">descripcion,nombre,precio,stock,url_imagen,categoria_id,colores,tallas
+Camiseta algodón premium,Camiseta Oversize Black,85000,50,https://img1.jpg,1,"Negro,Gris,Blanco","S,M,L,XL"
+Saco tejido,Saco Crochet,140000,15,https://img2.jpg,2,"Beige,Café","M,L"</pre>
     </div>
   </div>
 

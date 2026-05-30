@@ -19,15 +19,16 @@ import com.tienda.ecommerce.productos.repository.ProductoRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
-
 @Service
 public class ProductoService {
-
 
     private final ProductoRepository productoRepository;
 
     @Autowired
     private final CategoriaRepository categoriaRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public ProductoService(ProductoRepository productoRepository, CategoriaRepository categoriaRepository) {
         this.productoRepository = productoRepository;
@@ -36,21 +37,17 @@ public class ProductoService {
 
     // --- LÓGICA DE CATEGORÍAS ---
 
-
-    @PersistenceContext
-private EntityManager entityManager;
-
     @Transactional
-public Categoria guardarCategoria(Categoria categoria) {
-    Long idLibre = buscarPrimerIdLibre();
-    entityManager.createNativeQuery(
-        "INSERT INTO categorias (id, nombre) VALUES (:id, :nombre)")
-        .setParameter("id", idLibre)
-        .setParameter("nombre", categoria.getNombre())
-        .executeUpdate();
-    categoria.setId(idLibre);
-    return categoria;
-}
+    public Categoria guardarCategoria(Categoria categoria) {
+        Long idLibre = buscarPrimerIdLibre();
+        entityManager.createNativeQuery(
+            "INSERT INTO categorias (id, nombre) VALUES (:id, :nombre)")
+            .setParameter("id", idLibre)
+            .setParameter("nombre", categoria.getNombre())
+            .executeUpdate();
+        categoria.setId(idLibre);
+        return categoria;
+    }
 
     private Long buscarPrimerIdLibre() {
         long idLibre = 1L;
@@ -61,21 +58,17 @@ public Categoria guardarCategoria(Categoria categoria) {
                 .toList();
 
         for (Long id : ids) {
-            if (id > idLibre) {
-                break;
-            }
-            if (id.equals(idLibre)) {
-                idLibre++;
-            }
+            if (id > idLibre) break;
+            if (id.equals(idLibre)) idLibre++;
         }
         return idLibre;
     }
 
     public List<Categoria> listarCategorias() {
-    return categoriaRepository.findAll().stream()
-        .sorted((a, b) -> Long.compare(a.getId(), b.getId()))
-        .toList();
-}
+        return categoriaRepository.findAll().stream()
+            .sorted((a, b) -> Long.compare(a.getId(), b.getId()))
+            .toList();
+    }
 
     // --- LÓGICA DE PRODUCTOS ---
 
@@ -88,17 +81,16 @@ public Categoria guardarCategoria(Categoria categoria) {
     }
 
     public Producto guardarProducto(Producto producto) {
-        // Aquí podríamos validar si la categoría existe antes de guardar
         return productoRepository.save(producto);
     }
 
     @Transactional
-public void eliminarProducto(Long id) {
-    entityManager.createNativeQuery("DELETE FROM carrito WHERE producto_id = :id")
-        .setParameter("id", id)
-        .executeUpdate();
-    productoRepository.deleteById(id);
-}
+    public void eliminarProducto(Long id) {
+        entityManager.createNativeQuery("DELETE FROM carrito WHERE producto_id = :id")
+            .setParameter("id", id)
+            .executeUpdate();
+        productoRepository.deleteById(id);
+    }
 
     public String eliminarCategoriaConProductos(Long categoriaId) {
         Categoria categoria = categoriaRepository.findById(categoriaId)
@@ -119,9 +111,31 @@ public void eliminarProducto(Long id) {
         return resumen.toString();
     }
 
+    // --- PARSEO CSV RESPETANDO COMILLAS ---
+
+    private String[] parsearLineaCsv(String linea) {
+        List<String> campos = new ArrayList<>();
+        boolean dentroDeComillas = false;
+        StringBuilder campo = new StringBuilder();
+
+        for (char c : linea.toCharArray()) {
+            if (c == '"') {
+                dentroDeComillas = !dentroDeComillas;
+            } else if (c == ',' && !dentroDeComillas) {
+                campos.add(campo.toString().trim());
+                campo = new StringBuilder();
+            } else {
+                campo.append(c);
+            }
+        }
+        campos.add(campo.toString().trim());
+        return campos.toArray(new String[0]);
+    }
+
     @Transactional
     public String cargarProductosDesdeCsv(MultipartFile archivo) {
-        try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(archivo.getInputStream(), StandardCharsets.UTF_8))) {
+        try (BufferedReader fileReader = new BufferedReader(
+                new InputStreamReader(archivo.getInputStream(), StandardCharsets.UTF_8))) {
             String linea;
             boolean primeraLinea = true;
             List<Producto> productos = new ArrayList<>();
@@ -135,9 +149,9 @@ public void eliminarProducto(Long id) {
                     continue;
                 }
 
-                String[] datos = linea.split(",");
+                String[] datos = parsearLineaCsv(linea);
                 if (datos.length < 8) {
-                    errores.add("Línea " + numeroLinea + ": formato inválido");
+                    errores.add("Línea " + numeroLinea + ": formato inválido (se esperaban 8 columnas, se encontraron " + datos.length + ")");
                     continue;
                 }
 
