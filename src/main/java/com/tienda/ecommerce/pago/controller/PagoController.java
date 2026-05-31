@@ -31,7 +31,12 @@ public class PagoController {
     }
 
     @GetMapping("/historial/{usuarioId}")
-public List<Pago> historial(@PathVariable Long usuarioId) {
-    return pagoService.historialPorUsuario(usuarioId);
-}
+    public List<Pago> historial(@PathVariable Long usuarioId) {
+        return pagoService.historialPorUsuario(usuarioId);
+    }
+
+    @GetMapping("/todos")
+    public List<Pago> todos() {
+        return pagoService.listarTodos();
+    }
 }

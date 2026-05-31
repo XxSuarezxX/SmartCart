@@ -127,4 +127,8 @@ public class PagoService {
             log.error("No se pudo preparar/enviar el recibo del pago {}: {}", pago.getId(), e.getMessage(), e);
         }
     }
+
+    public List<Pago> listarTodos() {
+    return pagoRepository.findAll();
+}
 }
