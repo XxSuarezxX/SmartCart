@@ -65,15 +65,57 @@ export class AdminPanelComponent implements OnInit {
   }
 
   cargarDashboard() {
-    this.adminService.getDashboard().subscribe({
-      next: (data) => {
-        this.dashboard = data;
-        this.ranking = data?.topProductos || [];
-        this.cdr.detectChanges();
-      },
-      error: (err) => console.error('Error dashboard:', err)
-    });
-  }
+  // Cargar ranking de interacciones
+  const headers = new HttpHeaders({ Authorization: `Bearer ${this.authService.getToken()}` });
+  this.http.get<any[]>('/api/interacciones/admin/ranking', { headers }).subscribe({
+    next: (data) => {
+      this.ranking = data || [];
+      this.cdr.detectChanges();
+    },
+    error: () => { this.ranking = []; }
+  });
+
+  // Cargar pagos/compras
+  this.http.get<any[]>('/api/pagos/todos', { headers }).subscribe({
+    next: (data) => {
+      if (!this.dashboard) this.dashboard = {};
+      this.dashboard.pagosRecientes = data?.slice(0, 5).map((p: any) => ({
+        clienteNombre: p.usuario?.nombre || 'Cliente',
+        clienteEmail: p.usuario?.email || '',
+        monto: p.montoTotal,
+        estado: p.estado,
+        fecha: new Date(p.fechaPago).toLocaleDateString('es-CO')
+      })) || [];
+      this.dashboard.ingresosTotales = data?.reduce((acc: number, p: any) => acc + p.montoTotal, 0) || 0;
+      this.dashboard.totalPagos = data?.length || 0;
+      this.cdr.detectChanges();
+    },
+    error: () => {
+      if (!this.dashboard) this.dashboard = {};
+      this.dashboard.pagosRecientes = [];
+      this.dashboard.ingresosTotales = 0;
+      this.dashboard.totalPagos = 0;
+      this.cdr.detectChanges();
+    }
+  });
+
+  // Cargar clientes
+  this.authService.getUsuarios().subscribe({
+    next: (data: any[]) => {
+      const clientes = data.filter(u => u.rol === 'CLIENTE');
+      if (!this.dashboard) this.dashboard = {};
+      this.dashboard.totalClientes = clientes.length;
+      this.dashboard.clientesRecientes = clientes.slice(0, 5).map(u => ({
+        nombre: u.nombre,
+        email: u.email,
+        totalPagos: 0,
+        totalGastado: 0
+      }));
+      this.cdr.detectChanges();
+    },
+    error: () => {}
+  });
+}
 
   cargarProductos() {
     this.productoService.getProductos().subscribe((data: any[]) => {
