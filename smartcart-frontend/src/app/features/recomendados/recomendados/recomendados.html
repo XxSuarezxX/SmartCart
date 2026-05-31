@@ -1,6 +1,5 @@
 <div class="recomendados-page">
 
-  <!-- Hero -->
   <section class="rec-hero">
     <div class="rec-hero-text">
       <span class="badge">Especialmente para ti</span>
@@ -11,25 +10,23 @@
     </div>
   </section>
 
-  <!-- Loading -->
   <div class="loading" *ngIf="cargando">
     <div class="spinner"></div>
     <p>Cargando recomendaciones...</p>
   </div>
 
-  <!-- Recomendados personalizados -->
   <section class="rec-section" *ngIf="!cargando && isLoggedIn && recomendados.length > 0">
     <div class="section-header">
       <h2>Recomendado para ti</h2>
       <p class="section-sub">Basado en tus interacciones</p>
     </div>
     <div class="grid">
-      <div class="card" *ngFor="let p of recomendados" (click)="irADetalle(p.id)">
+      <div class="card" *ngFor="let p of recomendados" (click)="irADetalle(p)">
         <div class="card-img-wrapper">
-          <img [src]="p.urlImagen" [alt]="p.nombre" onerror="this.src='https://placehold.co/300x400?text=Sin+imagen'">
+          <img [src]="getPrimeraImagen(p.urlImagen)" [alt]="p.nombre" onerror="this.src='https://placehold.co/300x400?text=Sin+imagen'">
           <button class="like-btn" (click)="toggleLike($event, p)" [class.liked]="p.liked">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-              [attr.fill]="p.liked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2">
+                 [attr.fill]="p.liked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2">
               <path
                 d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
             </svg>
@@ -44,11 +41,10 @@
     </div>
   </section>
 
-  <!-- Sin recomendaciones aún -->
   <section class="rec-section" *ngIf="!cargando && isLoggedIn && recomendados.length === 0">
     <div class="empty-state">
       <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none"
-        stroke="currentColor" stroke-width="1">
+           stroke="currentColor" stroke-width="1">
         <path
           d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
       </svg>
@@ -58,20 +54,19 @@
     </div>
   </section>
 
-  <!-- Populares (sin sesión) -->
-  <section class="rec-section" *ngIf="!cargando && !isLoggedIn">
+  <section class="rec-section" *ngIf="!cargando && (!isLoggedIn || recomendados.length === 0 && productosPopulares.length > 0)">
     <div class="section-header">
       <h2>Productos Populares</h2>
       <p class="section-sub">Lo más visto en SmartCart</p>
     </div>
     <div class="grid">
-      <div class="card" *ngFor="let p of productosPopulares" (click)="irADetalle(p.id)">a
+      <div class="card" *ngFor="let p of productosPopulares" (click)="irADetalle(p)">
         <div class="card-img-wrapper">
           <img [src]="getPrimeraImagen(p.urlImagen)" [alt]="p.nombre"
-            onerror="this.src='https://placehold.co/300x400?text=Sin+imagen'">
-          <button class="like-btn" (click)="toggleLike($event, p)">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2">
+               onerror="this.src='https://placehold.co/300x400?text=Sin+imagen'">
+          <button class="like-btn" (click)="toggleLike($event, p)" [class.liked]="p.liked">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                 [attr.fill]="p.liked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2">
               <path
                 d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
             </svg>

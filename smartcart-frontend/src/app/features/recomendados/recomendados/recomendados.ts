@@ -56,8 +56,12 @@ export class RecomendadosComponent implements OnInit {
     });
   }
 
-  irADetalle(id: number) {
-    this.router.navigate(['/producto', id]);
+  irADetalle(producto: any) {
+    if (this.isLoggedIn && producto.categoria?.id) {
+      const userId = this.authService.getUserId();
+      // Si en el futuro manejas clicks, aquí registrarías la vista.
+    }
+    this.router.navigate(['/producto', producto.id]);
   }
 
   toggleLike(event: Event, producto: any) {
@@ -66,11 +70,16 @@ export class RecomendadosComponent implements OnInit {
       this.router.navigate(['/login']);
       return;
     }
+
     producto.liked = !producto.liked;
-    if (producto.liked) {
+
+    if (producto.liked && producto.categoria?.id) {
       const userId = this.authService.getUserId();
+      // Enviamos el 'LIKE' exacto que tu Java mapea
       this.interaccionService.registrarInteraccion(
-        userId, producto.id, producto.categoria?.id
+        userId,
+        producto.categoria.id,
+        'LIKE'
       ).subscribe();
     }
     this.cdr.detectChanges();
