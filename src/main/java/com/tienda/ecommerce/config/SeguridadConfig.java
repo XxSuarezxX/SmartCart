@@ -41,9 +41,8 @@ public class SeguridadConfig {
                 }))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/", "/index.html", "/favicon.ico",
-                                "/*.js", "/*.css", "/*.map", "/*.txt", "/*.json",
-                                "/assets/**", "/media/**").permitAll()
+                        .requestMatchers("/", "/index.html",
+                                "/*.js", "/*.css", "/*.ico", "/assets/**").permitAll()
                         .requestMatchers("/login", "/registro", "/catalogo",
                                 "/mi-cuenta", "/recomendados", "/carrito",
                                 "/producto/**", "/admin").permitAll()
