@@ -2,12 +2,12 @@ package com.tienda.ecommerce.usuarios.controller;
 
 import com.tienda.ecommerce.usuarios.dto.LoginRequest;
 import com.tienda.ecommerce.usuarios.dto.LoginResponse;
+import com.tienda.ecommerce.usuarios.dto.UsuarioResponse;
 import com.tienda.ecommerce.usuarios.model.Usuario;
 import com.tienda.ecommerce.usuarios.service.UsuarioService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -20,24 +20,21 @@ public class UsuarioController {
     }
 
     @GetMapping("/usuarios")
-public java.util.List<Usuario> listarUsuarios() {
-    return usuarioService.listarTodos();
-}
+    public List<UsuarioResponse> listarUsuarios() {
+        return usuarioService.listarTodos().stream()
+                .map(UsuarioResponse::from)
+                .toList();
+    }
 
     @PostMapping("/registro")
-    public Usuario registrar(@RequestBody Usuario usuario) {
-        return usuarioService.registrar(usuario);
+    public UsuarioResponse registrar(@RequestBody Usuario usuario) {
+        return UsuarioResponse.from(usuarioService.registrar(usuario));
     }
 
     @PostMapping("/login")
-public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
-    try {
-        LoginResponse response = usuarioService.autenticar(loginRequest.getEmail(), loginRequest.getPassword());
-        return ResponseEntity.ok(response);
-    } catch (RuntimeException e) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    public LoginResponse login(@RequestBody LoginRequest loginRequest) {
+        // Si las credenciales son inválidas, el servicio lanza
+        // CredencialesInvalidasException y el GlobalExceptionHandler responde 401.
+        return usuarioService.autenticar(loginRequest.getEmail(), loginRequest.getPassword());
     }
-
-    
-}
 }

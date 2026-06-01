@@ -2,13 +2,17 @@ package com.tienda.ecommerce.pago.service;
 
 import com.tienda.ecommerce.carrito.model.Carrito;
 import com.tienda.ecommerce.carrito.service.CarritoService;
+import com.tienda.ecommerce.common.exception.RecursoNoEncontradoException;
+import com.tienda.ecommerce.common.exception.ReglaNegocioException;
 import com.tienda.ecommerce.pago.dto.PagoRequest;
+import com.tienda.ecommerce.pago.model.EstadoPago;
 import com.tienda.ecommerce.pago.model.Pago;
 import com.tienda.ecommerce.pago.repository.PagoRepository;
 import com.tienda.ecommerce.productos.model.Categoria;
 import com.tienda.ecommerce.productos.model.Producto;
 import com.tienda.ecommerce.productos.repository.ProductoRepository;
 import com.tienda.ecommerce.recomendacion.model.Interaccion;
+import com.tienda.ecommerce.recomendacion.model.TipoInteraccion;
 import com.tienda.ecommerce.recomendacion.service.RecomendacionService;
 import com.tienda.ecommerce.usuarios.model.Usuario;
 import com.tienda.ecommerce.usuarios.repository.UsuarioRepository;
@@ -107,7 +111,7 @@ class PagoServiceTest {
         Pago resultado = pagoService.procesarPago(request);
 
         assertThat(resultado.getMontoTotal()).isEqualTo(190.0);
-        assertThat(resultado.getEstado()).isEqualTo("EXITOSO");
+        assertThat(resultado.getEstado()).isEqualTo(EstadoPago.EXITOSO);
         assertThat(resultado.getUsuario()).isSameAs(usuario);
         assertThat(resultado.getFechaPago()).isNotNull();
 
@@ -117,7 +121,7 @@ class PagoServiceTest {
         assertThat(interacciones).allSatisfy(i -> {
             assertThat(i.getUsuarioId()).isEqualTo(1L);
             assertThat(i.getCategoriaId()).isEqualTo(50L);
-            assertThat(i.getTipo()).isEqualTo("COMPRA");
+            assertThat(i.getTipo()).isEqualTo(TipoInteraccion.COMPRA);
         });
         assertThat(interacciones).extracting(Interaccion::getProductoId).containsExactly(10L, 11L);
 
@@ -136,7 +140,7 @@ class PagoServiceTest {
         when(carritoService.obtenerCarrito(1L)).thenReturn(Collections.emptyList());
 
         assertThatThrownBy(() -> pagoService.procesarPago(request))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(ReglaNegocioException.class)
                 .hasMessage("El carrito está vacío");
 
         verify(pagoRepository, never()).save(any());
@@ -153,7 +157,7 @@ class PagoServiceTest {
         when(usuarioRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> pagoService.procesarPago(request))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(RecursoNoEncontradoException.class)
                 .hasMessage("Usuario no encontrado");
 
         verify(pagoRepository, never()).save(any());

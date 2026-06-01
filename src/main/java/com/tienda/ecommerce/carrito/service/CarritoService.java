@@ -2,6 +2,7 @@ package com.tienda.ecommerce.carrito.service;
 
 import com.tienda.ecommerce.carrito.model.Carrito;
 import com.tienda.ecommerce.carrito.repository.CarritoRepository;
+import com.tienda.ecommerce.common.exception.RecursoNoEncontradoException;
 import com.tienda.ecommerce.productos.model.Producto;
 import com.tienda.ecommerce.productos.repository.ProductoRepository;
 import com.tienda.ecommerce.usuarios.model.Usuario;
@@ -32,9 +33,9 @@ public class CarritoService {
 
     public Carrito agregarProducto(Long usuarioId, Long productoId, int cantidad) {
         Usuario usuario = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
         Producto producto = productoRepository.findById(productoId)
-                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Producto no encontrado"));
 
         // Si el producto ya está en el carrito, suma la cantidad
         return carritoRepository.findByUsuarioIdAndProductoId(usuarioId, productoId)
@@ -53,7 +54,7 @@ public class CarritoService {
 
     public Carrito actualizarCantidad(Long carritoId, int cantidad) {
         Carrito item = carritoRepository.findById(carritoId)
-                .orElseThrow(() -> new RuntimeException("Item no encontrado en el carrito"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Item no encontrado en el carrito"));
         item.setCantidad(cantidad);
         return carritoRepository.save(item);
     }

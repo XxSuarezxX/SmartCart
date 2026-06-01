@@ -1,16 +1,16 @@
 package com.tienda.ecommerce.productos.service;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.tienda.ecommerce.common.exception.RecursoNoEncontradoException;
+import com.tienda.ecommerce.productos.csv.FilaProductoCsv;
+import com.tienda.ecommerce.productos.csv.ProductoCsvParser;
+import com.tienda.ecommerce.productos.csv.ResultadoParseoCsv;
 import com.tienda.ecommerce.productos.model.Categoria;
 import com.tienda.ecommerce.productos.model.Producto;
 import com.tienda.ecommerce.productos.repository.CategoriaRepository;
@@ -23,16 +23,18 @@ import jakarta.persistence.PersistenceContext;
 public class ProductoService {
 
     private final ProductoRepository productoRepository;
-
-    @Autowired
     private final CategoriaRepository categoriaRepository;
+    private final ProductoCsvParser productoCsvParser;
 
     @PersistenceContext
     private EntityManager entityManager;
 
-    public ProductoService(ProductoRepository productoRepository, CategoriaRepository categoriaRepository) {
+    public ProductoService(ProductoRepository productoRepository,
+                           CategoriaRepository categoriaRepository,
+                           ProductoCsvParser productoCsvParser) {
         this.productoRepository = productoRepository;
         this.categoriaRepository = categoriaRepository;
+        this.productoCsvParser = productoCsvParser;
     }
 
     // --- LÓGICA DE CATEGORÍAS ---
@@ -94,7 +96,7 @@ public class ProductoService {
 
     public String eliminarCategoriaConProductos(Long categoriaId) {
         Categoria categoria = categoriaRepository.findById(categoriaId)
-                .orElseThrow(() -> new RuntimeException("Categoría no encontrada: " + categoriaId));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Categoría no encontrada: " + categoriaId));
 
         List<Producto> productos = productoRepository.findByCategoriaId(categoriaId);
         List<String> nombresProductos = productos.stream().map(Producto::getNombre).toList();
@@ -111,95 +113,47 @@ public class ProductoService {
         return resumen.toString();
     }
 
-    // --- PARSEO CSV RESPETANDO COMILLAS ---
-
-    private String[] parsearLineaCsv(String linea) {
-        List<String> campos = new ArrayList<>();
-        boolean dentroDeComillas = false;
-        StringBuilder campo = new StringBuilder();
-
-        for (char c : linea.toCharArray()) {
-            if (c == '"') {
-                dentroDeComillas = !dentroDeComillas;
-            } else if (c == ',' && !dentroDeComillas) {
-                campos.add(campo.toString().trim());
-                campo = new StringBuilder();
-            } else {
-                campo.append(c);
-            }
-        }
-        campos.add(campo.toString().trim());
-        return campos.toArray(new String[0]);
-    }
+    // --- CARGA MASIVA DESDE CSV ---
+    // El parseo del archivo lo hace ProductoCsvParser (SRP); aquí solo
+    // resolvemos las categorías y persistimos los productos válidos.
 
     @Transactional
     public String cargarProductosDesdeCsv(MultipartFile archivo) {
-        try (BufferedReader fileReader = new BufferedReader(
-                new InputStreamReader(archivo.getInputStream(), StandardCharsets.UTF_8))) {
-            String linea;
-            boolean primeraLinea = true;
-            List<Producto> productos = new ArrayList<>();
-            List<String> errores = new ArrayList<>();
-            int numeroLinea = 0;
+        ResultadoParseoCsv parseo = productoCsvParser.parse(archivo);
 
-            while ((linea = fileReader.readLine()) != null) {
-                numeroLinea++;
-                if (primeraLinea) {
-                    primeraLinea = false;
-                    continue;
-                }
+        List<String> errores = new ArrayList<>(parseo.errores());
+        List<Producto> productos = new ArrayList<>();
 
-                String[] datos = parsearLineaCsv(linea);
-                if (datos.length < 8) {
-                    errores.add("Línea " + numeroLinea + ": formato inválido (se esperaban 8 columnas, se encontraron " + datos.length + ")");
-                    continue;
-                }
-
-                try {
-                    String descripcion = datos[0].trim();
-                    String nombre = datos[1].trim();
-                    Double precio = Double.parseDouble(datos[2].trim());
-                    int stock = Integer.parseInt(datos[3].trim());
-                    String urlImagen = datos[4].trim();
-                    Long categoriaId = Long.parseLong(datos[5].trim());
-                    String colores = datos[6].trim();
-                    String tallas = datos[7].trim();
-
-                    Categoria categoria = categoriaRepository.findById(categoriaId).orElse(null);
-                    if (categoria == null) {
-                        errores.add("Línea " + numeroLinea + ": categoría no encontrada " + categoriaId);
-                        continue;
-                    }
-
-                    Producto producto = new Producto();
-                    producto.setDescripcion(descripcion);
-                    producto.setNombre(nombre);
-                    producto.setPrecio(precio);
-                    producto.setStock(stock);
-                    producto.setUrlImagen(urlImagen);
-                    producto.setCategoria(categoria);
-                    producto.setColores(colores);
-                    producto.setTallas(tallas);
-
-                    productos.add(producto);
-                } catch (NumberFormatException e) {
-                    errores.add("Línea " + numeroLinea + ": valores numéricos inválidos");
-                }
+        for (FilaProductoCsv fila : parseo.filas()) {
+            Categoria categoria = categoriaRepository.findById(fila.categoriaId()).orElse(null);
+            if (categoria == null) {
+                errores.add("Línea " + fila.numeroLinea() + ": categoría no encontrada " + fila.categoriaId());
+                continue;
             }
 
-            productoRepository.saveAll(productos);
+            Producto producto = new Producto();
+            producto.setDescripcion(fila.descripcion());
+            producto.setNombre(fila.nombre());
+            producto.setPrecio(fila.precio());
+            producto.setStock(fila.stock());
+            producto.setUrlImagen(fila.urlImagen());
+            producto.setCategoria(categoria);
+            producto.setColores(fila.colores());
+            producto.setTallas(fila.tallas());
 
-            StringBuilder resumen = new StringBuilder();
-            resumen.append("Productos cargados: ").append(productos.size());
-            if (!errores.isEmpty()) {
-                resumen.append(". No se cargaron ")
-                        .append(errores.size())
-                        .append(" registros: ")
-                        .append(String.join("; ", errores));
-            }
-            return resumen.toString();
-        } catch (Exception e) {
-            throw new RuntimeException("Error al procesar el archivo CSV: " + e.getMessage());
+            productos.add(producto);
         }
+
+        productoRepository.saveAll(productos);
+
+        StringBuilder resumen = new StringBuilder();
+        resumen.append("Productos cargados: ").append(productos.size());
+        if (!errores.isEmpty()) {
+            resumen.append(". No se cargaron ")
+                    .append(errores.size())
+                    .append(" registros: ")
+                    .append(String.join("; ", errores));
+        }
+        return resumen.toString();
     }
 }

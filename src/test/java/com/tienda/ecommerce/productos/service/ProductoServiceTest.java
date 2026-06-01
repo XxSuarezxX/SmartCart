@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.tienda.ecommerce.productos.csv.ProductoCsvParser;
 import com.tienda.ecommerce.productos.model.Categoria;
 import com.tienda.ecommerce.productos.model.Producto;
 import com.tienda.ecommerce.productos.repository.CategoriaRepository;
@@ -33,6 +34,9 @@ class ProductoServiceTest {
 
     @Mock
     private CategoriaRepository categoriaRepository;
+
+    @Mock
+    private ProductoCsvParser productoCsvParser;
 
     @Mock
     private EntityManager entityManager;

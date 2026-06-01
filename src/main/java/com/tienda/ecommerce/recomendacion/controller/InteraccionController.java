@@ -3,8 +3,8 @@ package com.tienda.ecommerce.recomendacion.controller;
 import com.tienda.ecommerce.productos.model.Producto;
 import com.tienda.ecommerce.recomendacion.dto.InteraccionDTO;
 import com.tienda.ecommerce.recomendacion.model.Interaccion;
+import com.tienda.ecommerce.recomendacion.model.TipoInteraccion;
 import com.tienda.ecommerce.recomendacion.service.RecomendacionService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,8 +14,11 @@ import java.util.List;
 @RequestMapping("/api/interacciones")
 public class InteraccionController {
 
-    @Autowired
-    private RecomendacionService recomendacionService;
+    private final RecomendacionService recomendacionService;
+
+    public InteraccionController(RecomendacionService recomendacionService) {
+        this.recomendacionService = recomendacionService;
+    }
 
     @PostMapping("/registrar")
     public Interaccion registrar(@RequestBody InteraccionDTO dto) {
@@ -25,7 +28,7 @@ public class InteraccionController {
         nuevaInteraccion.setUsuarioId(dto.getUsuarioId());
         nuevaInteraccion.setCategoriaId(dto.getCategoriaId());
         nuevaInteraccion.setProductoId(dto.getProductoId());
-        nuevaInteraccion.setTipo(dto.getTipo());
+        nuevaInteraccion.setTipo(TipoInteraccion.fromString(dto.getTipo()));
 
         // Los puntos los calcula el servicio a partir del tipo.
         return recomendacionService.guardarInteraccion(nuevaInteraccion);

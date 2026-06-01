@@ -10,12 +10,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tienda.ecommerce.carrito.model.Carrito;
 import com.tienda.ecommerce.carrito.service.CarritoService;
+import com.tienda.ecommerce.common.exception.RecursoNoEncontradoException;
+import com.tienda.ecommerce.common.exception.ReglaNegocioException;
 import com.tienda.ecommerce.pago.dto.PagoRequest;
+import com.tienda.ecommerce.pago.model.EstadoPago;
 import com.tienda.ecommerce.pago.model.Pago;
 import com.tienda.ecommerce.pago.model.PagoItem;
 import com.tienda.ecommerce.pago.repository.PagoRepository;
 import com.tienda.ecommerce.productos.repository.ProductoRepository;
 import com.tienda.ecommerce.recomendacion.model.Interaccion;
+import com.tienda.ecommerce.recomendacion.model.TipoInteraccion;
 import com.tienda.ecommerce.recomendacion.service.RecomendacionService;
 import com.tienda.ecommerce.usuarios.model.Usuario;
 import com.tienda.ecommerce.usuarios.repository.UsuarioRepository;
@@ -54,7 +58,7 @@ public class PagoService {
         // 1. Buscar los items del carrito del usuario
         List<Carrito> items = carritoService.obtenerCarrito(request.getUsuarioId());
         if (items.isEmpty()) {
-            throw new RuntimeException("El carrito está vacío");
+            throw new ReglaNegocioException("El carrito está vacío");
         }
 
         // 2. Calcular el total acumulado
@@ -64,13 +68,13 @@ public class PagoService {
 
         // 3. Crear el registro del Pago
         Usuario usuario = usuarioRepository.findById(request.getUsuarioId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
 
         Pago pago = new Pago();
         pago.setUsuario(usuario);
         pago.setMontoTotal(total);
         pago.setFechaPago(LocalDateTime.now());
-        pago.setEstado("EXITOSO");
+        pago.setEstado(EstadoPago.EXITOSO);
         pago.setDireccionEnvio(request.getDireccionEnvio());
 
 
@@ -97,7 +101,7 @@ public class PagoService {
 
             // Obtenemos el ID de la categoría desde el objeto Producto del carrito
             nuevaInteraccion.setCategoriaId(item.getProducto().getCategoria().getId());
-            nuevaInteraccion.setTipo("COMPRA");
+            nuevaInteraccion.setTipo(TipoInteraccion.COMPRA);
             // La fecha ya se inicializa sola con LocalDateTime.now() en tu modelo
 
             recomendacionService.guardarInteraccion(nuevaInteraccion);

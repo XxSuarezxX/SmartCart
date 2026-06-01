@@ -3,6 +3,7 @@ package com.tienda.ecommerce.recomendacion.controller;
 import com.tienda.ecommerce.productos.model.Producto;
 import com.tienda.ecommerce.recomendacion.dto.InteraccionDTO;
 import com.tienda.ecommerce.recomendacion.model.Interaccion;
+import com.tienda.ecommerce.recomendacion.model.TipoInteraccion;
 import com.tienda.ecommerce.recomendacion.service.RecomendacionService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,7 +47,7 @@ class InteraccionControllerTest {
 
         assertThat(enviada.getUsuarioId()).isEqualTo(1L);
         assertThat(enviada.getCategoriaId()).isEqualTo(7L);
-        assertThat(enviada.getTipo()).isEqualTo("LIKE");
+        assertThat(enviada.getTipo()).isEqualTo(TipoInteraccion.LIKE);
         // El id y los puntos no se inyectan desde el DTO: los calcula/asigna el servicio.
         assertThat(enviada.getId()).isNull();
         assertThat(enviada.getPuntos()).isZero();
