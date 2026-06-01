@@ -214,11 +214,12 @@ El plan de prueba está en [`src/test/jmeter/smartcart_load_test.jmx`](src/test/
 El plugin de Maven descarga JMeter automáticamente. Con la app corriendo:
 
 ```bash
-./mvnw -Pjmeter verify
+./mvnw clean -Pjmeter -DskipTests verify
 ```
 
-> ⚠️ No uses `-DskipTests`: el plugin de JMeter también lo respeta y se saltaría la
-> prueba de carga (`Performance tests are skipped`).
+> El `clean` evita el error *"folder is not empty"* de JMeter al re-ejecutar
+> (JMeter no sobreescribe una carpeta de reporte que ya tiene contenido).
 
 El reporte HTML se genera en `target/jmeter/reports/`. Parámetros ajustables (con `-D`):
-`threads` (usuarios, 10), `loops` (iteraciones, 5), `rampup` (segundos, 5), `host`, `port`.
+`threads` (usuarios, 10), `loops` (iteraciones, 5), `rampup` (segundos, 5), `host` (por
+defecto `127.0.0.1`), `port` (8080).

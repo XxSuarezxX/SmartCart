@@ -168,9 +168,9 @@ jobs:
 
       - name: Esperar a que la aplicacion responda
         run: |
-          echo "Esperando a http://localhost:8080/productos ..."
+          echo "Esperando a http://127.0.0.1:8080/productos ..."
           for i in $(seq 1 60); do
-            code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/productos || true)
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/productos || true)
             if [ "$code" = "200" ]; then
               echo "Aplicacion lista (HTTP $code)"
               exit 0
@@ -187,7 +187,7 @@ jobs:
         run: |
           ./mvnw --batch-mode --no-transfer-progress test \
             -Dgroups=e2e -DexcludedGroups= \
-            -De2e.base-url=http://localhost:8080
+            -De2e.base-url=http://127.0.0.1:8080
 
       - name: Detener la aplicacion
         if: always()
@@ -263,9 +263,9 @@ jobs:
 
       - name: Esperar a que la aplicacion responda
         run: |
-          echo "Esperando a http://localhost:8080/productos ..."
+          echo "Esperando a http://127.0.0.1:8080/productos ..."
           for i in $(seq 1 60); do
-            code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/productos || true)
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/productos || true)
             if [ "$code" = "200" ]; then
               echo "Aplicacion lista (HTTP $code)"
               exit 0
@@ -276,13 +276,22 @@ jobs:
           tail -n 100 app.log
           exit 1
 
+      # Diagnostico: confirma que la app sigue arriba justo antes de la carga
+      # y muestra el final del log (util si JMeter no logra conectar).
+      - name: Verificar estado de la aplicacion
+        run: |
+          echo "Health-check previo a JMeter:"
+          curl -sS -o /dev/null -w "HTTP %{http_code}\n" http://127.0.0.1:8080/productos
+          echo "--- ultimas lineas de app.log ---"
+          tail -n 30 app.log || true
+
       # El jmeter-maven-plugin descarga JMeter, ejecuta src/test/jmeter/*.jmx
       # y comprueba el porcentaje de error (falla si supera el umbral del pom).
       # Los goals (configure -> jmeter -> results) van enlazados al ciclo de vida,
-      # por eso se lanza con 'verify'. OJO: no usar -DskipTests, porque el plugin
-      # de JMeter también lo respeta y se saltaría la prueba de carga.
+      # por eso se lanza con 'verify'. -DskipTests salta solo las unitarias: el
+      # plugin de JMeter las ejecuta igual gracias a <skipTests>false</skipTests>.
       - name: Ejecutar prueba de carga con JMeter
-        run: ./mvnw --batch-mode --no-transfer-progress -Pjmeter verify
+        run: ./mvnw --batch-mode --no-transfer-progress -Pjmeter -DskipTests verify
 
       - name: Detener la aplicacion
         if: always()
