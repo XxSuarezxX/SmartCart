@@ -162,8 +162,14 @@ jobs:
           SPRING_DATASOURCE_PASSWORD: postgres
         run: |
           JAR=$(find target -name '*.jar' -not -name '*.original' | head -n 1)
-          echo "Iniciando $JAR"
-          nohup java -jar "$JAR" > app.log 2>&1 &
+          # IMPORTANTE: copiamos el jar FUERA de target/ y arrancamos desde la copia.
+          # 'mvn verify' (paso de JMeter) ejecuta spring-boot:repackage y REESCRIBE
+          # target/*.jar; si la app corre desde ese mismo archivo, la carga lazy de
+          # clases se corrompe (NoClassDefFoundError: ch/qos/logback/.../ThrowableProxy)
+          # y los hilos de Tomcat mueren -> 100% de timeouts en JMeter.
+          cp "$JAR" "$RUNNER_TEMP/smartcart-app.jar"
+          echo "Iniciando $RUNNER_TEMP/smartcart-app.jar (copia de $JAR)"
+          nohup java -jar "$RUNNER_TEMP/smartcart-app.jar" > app.log 2>&1 &
           echo $! > app.pid
 
       - name: Esperar a que la aplicacion responda
@@ -257,8 +263,14 @@ jobs:
           SPRING_DATASOURCE_PASSWORD: postgres
         run: |
           JAR=$(find target -name '*.jar' -not -name '*.original' | head -n 1)
-          echo "Iniciando $JAR"
-          nohup java -jar "$JAR" > app.log 2>&1 &
+          # IMPORTANTE: copiamos el jar FUERA de target/ y arrancamos desde la copia.
+          # 'mvn verify' (paso de JMeter) ejecuta spring-boot:repackage y REESCRIBE
+          # target/*.jar; si la app corre desde ese mismo archivo, la carga lazy de
+          # clases se corrompe (NoClassDefFoundError: ch/qos/logback/.../ThrowableProxy)
+          # y los hilos de Tomcat mueren -> 100% de timeouts en JMeter.
+          cp "$JAR" "$RUNNER_TEMP/smartcart-app.jar"
+          echo "Iniciando $RUNNER_TEMP/smartcart-app.jar (copia de $JAR)"
+          nohup java -jar "$RUNNER_TEMP/smartcart-app.jar" > app.log 2>&1 &
           echo $! > app.pid
 
       - name: Esperar a que la aplicacion responda
@@ -281,7 +293,7 @@ jobs:
       - name: Verificar estado de la aplicacion
         run: |
           echo "Health-check previo a JMeter:"
-          curl -sS -o /dev/null -w "HTTP %{http_code}\n" http://127.0.0.1:8080/productos
+          curl -sS -o /dev/null -w "HTTP %{http_code}\n" http://127.0.0.1:8080/productos || true
           echo "--- ultimas lineas de app.log ---"
           tail -n 30 app.log || true
 
