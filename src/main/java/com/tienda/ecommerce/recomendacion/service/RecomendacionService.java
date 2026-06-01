@@ -17,7 +17,8 @@ public class RecomendacionService {
 
     public Interaccion guardarInteraccion(Interaccion interaccion) {
         // La lógica de negocio se queda aquí
-        int puntos = switch (interaccion.getTipo().toUpperCase()) {
+        String tipo = interaccion.getTipo() == null ? "" : interaccion.getTipo().toUpperCase();
+        int puntos = switch (tipo) {
             case "LIKE" -> 1;
             case "CARRITO" -> 2;
             case "COMPRA" -> 3;

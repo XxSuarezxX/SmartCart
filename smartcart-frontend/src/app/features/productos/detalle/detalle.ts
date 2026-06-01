@@ -90,7 +90,7 @@ export class DetalleComponent implements OnInit {
     if (this.liked) {
       const userId = this.authService.getUserId();
       this.interaccionService.registrarInteraccion(
-        userId, this.producto.id, this.producto.categoria?.id
+        userId, this.producto.categoria?.id, 'LIKE'
       ).subscribe();
 
       const favoritos = JSON.parse(localStorage.getItem('favoritos') || '[]');
@@ -119,6 +119,11 @@ export class DetalleComponent implements OnInit {
     const userId = this.authService.getUserId();
     this.carritoService.agregarProducto(userId, this.producto.id, 1).subscribe({
       next: () => {
+        if (this.producto.categoria?.id) {
+          this.interaccionService.registrarInteraccion(
+            userId, this.producto.categoria.id, 'CARRITO'
+          ).subscribe();
+        }
         this.router.navigate(['/carrito']);
       },
       error: () => {

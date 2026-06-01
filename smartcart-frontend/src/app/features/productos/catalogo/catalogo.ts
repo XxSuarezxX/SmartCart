@@ -90,7 +90,7 @@ export class CatalogoComponent implements OnInit {
     if (producto.liked) {
       const usuarioId = this.authService.getUserId();
       this.interaccionService.registrarInteraccion(
-        usuarioId, producto.id, producto.categoria?.id
+        usuarioId, producto.categoria?.id, 'LIKE'
       ).subscribe();
     }
     this.cdr.detectChanges();
@@ -110,5 +110,12 @@ export class CatalogoComponent implements OnInit {
       carrito.push({ ...producto, cantidad: 1 });
     }
     localStorage.setItem('carrito', JSON.stringify(carrito));
+
+    if (this.authService.isLoggedIn() && producto.categoria?.id) {
+      const usuarioId = this.authService.getUserId();
+      this.interaccionService.registrarInteraccion(
+        usuarioId, producto.categoria.id, 'CARRITO'
+      ).subscribe();
+    }
   }
 }

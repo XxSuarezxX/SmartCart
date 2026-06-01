@@ -65,7 +65,7 @@ export class HomeComponent implements OnInit {
     if (producto.liked) {
       const usuarioId = this.authService.getUserId();
       this.interaccionService.registrarInteraccion(
-        usuarioId, producto.id, producto.categoria?.id
+        usuarioId, producto.categoria?.id, 'LIKE'
       ).subscribe();
     }
     this.cdr.detectChanges();

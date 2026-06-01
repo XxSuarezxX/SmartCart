@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CarritoService } from '../../../core/services/carrito';
 import { AuthService } from '../../../core/services/auth';
+import { InteraccionService } from '../../../core/services/interaccion';
 import { PrecioPipe } from '../../../shared/pipes/precio-pipe';
 
 @Component({
@@ -31,6 +32,7 @@ export class CarritoComponent implements OnInit {
   constructor(
     private carritoService: CarritoService,
     private authService: AuthService,
+    private interaccionService: InteraccionService,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) { }
@@ -115,6 +117,19 @@ export class CarritoComponent implements OnInit {
       ...this.pago
     }).subscribe({
       next: () => {
+        // Registramos una interacción de COMPRA por cada categoría distinta
+        // del carrito, antes de vaciarlo.
+        const categorias = new Set<number>();
+        this.items.forEach(item => {
+          const categoriaId = item.producto?.categoria?.id;
+          if (categoriaId) categorias.add(categoriaId);
+        });
+        categorias.forEach(categoriaId => {
+          this.interaccionService.registrarInteraccion(
+            userId, categoriaId, 'COMPRA'
+          ).subscribe();
+        });
+
         this.pagoExitoso = true;
         this.items = [];
         this.procesandoPago = false;

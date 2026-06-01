@@ -7,6 +7,7 @@ import com.tienda.ecommerce.pago.model.Pago;
 import com.tienda.ecommerce.pago.repository.PagoRepository;
 import com.tienda.ecommerce.productos.model.Categoria;
 import com.tienda.ecommerce.productos.model.Producto;
+import com.tienda.ecommerce.productos.repository.ProductoRepository;
 import com.tienda.ecommerce.recomendacion.model.Interaccion;
 import com.tienda.ecommerce.recomendacion.service.RecomendacionService;
 import com.tienda.ecommerce.usuarios.model.Usuario;
@@ -54,6 +55,9 @@ class PagoServiceTest {
 
     @Mock
     private EmailService emailService;
+
+    @Mock
+    private ProductoRepository productoRepository;
 
     @InjectMocks
     private PagoService pagoService;
