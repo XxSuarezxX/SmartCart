@@ -1,0 +1,49 @@
+name: CI
+
+# Se ejecuta en cada push y en cada Pull Request hacia main
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Descarga el código del repositorio
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. Instala Java 21 (Temurin) y habilita la caché de dependencias Maven
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      # 3. Compila y ejecuta los tests (usa H2 en memoria via perfil 'test')
+      #    'verify' también genera el reporte de cobertura de JaCoCo
+      - name: Build and run tests
+        run: ./mvnw --batch-mode --no-transfer-progress verify
+
+      # 4. Publica los resultados de los tests (visible aunque fallen)
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: target/surefire-reports/
+          if-no-files-found: ignore
+
+      # 5. Publica el reporte de cobertura JaCoCo
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: target/site/jacoco/
+          if-no-files-found: ignore
