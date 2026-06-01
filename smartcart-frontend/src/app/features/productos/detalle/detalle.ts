@@ -126,29 +126,24 @@ export class DetalleComponent implements OnInit {
   }
 
   comprar() {
-    if (!this.authService.isLoggedIn()) {
-      this.router.navigate(['/login']);
-      return;
-    }
-    if (!this.tallaSeleccionada) {
-      alert('Selecciona una talla');
-      return;
-    }
-    const userId = this.authService.getUserId();
-    this.carritoService.agregarProducto(userId, this.producto.id, 1).subscribe({
-      next: () => {
-        if (this.producto.categoria?.id) {
-          this.interaccionService.registrarInteraccion(
-            userId, this.producto.categoria.id, this.producto.id, 'CARRITO'
-          ).subscribe();
-        }
-        this.router.navigate(['/carrito']);
-      },
-      error: () => {
-        alert('Error al agregar al carrito');
-      }
-    });
+  if (!this.authService.isLoggedIn()) {
+    this.router.navigate(['/login']);
+    return;
   }
+  if (!this.tallaSeleccionada) {
+    alert('Selecciona una talla');
+    return;
+  }
+  if (this.producto.stock <= 0) {
+    alert('No hay stock disponible');
+    return;
+  }
+  const userId = this.authService.getUserId();
+  this.carritoService.agregarProducto(userId, this.producto.id, 1).subscribe({
+    next: () => this.router.navigate(['/carrito']),
+    error: () => alert('Error al agregar al carrito')
+  });
+}
 
   imagenAnterior() {
     this.imagenActiva = this.imagenActiva > 0 ? this.imagenActiva - 1 : this.imagenes.length - 1;

@@ -13,11 +13,11 @@ public record CarritoResponse(
         CategoriaResumen categoria = c == null ? null : new CategoriaResumen(c.getId(), c.getNombre());
         return new CarritoResponse(
                 carrito.getId(),
-                new ProductoResumen(p.getId(), p.getNombre(), p.getPrecio(), p.getUrlImagen(), categoria),
+                new ProductoResumen(p.getId(), p.getNombre(), p.getPrecio(), p.getUrlImagen(), p.getStock(), categoria),
                 carrito.getCantidad());
     }
 
-    public record ProductoResumen(Long id, String nombre, Double precio, String urlImagen,
+    public record ProductoResumen(Long id, String nombre, Double precio, String urlImagen, Integer stock,
             CategoriaResumen categoria) {
     }
 

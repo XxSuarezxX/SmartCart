@@ -76,6 +76,10 @@ export class CarritoComponent implements OnInit {
       this.eliminarItem(item);
       return;
     }
+    if (cantidad > item.producto.stock) {
+      alert(`Solo hay ${item.producto.stock} unidades disponibles`);
+      return;
+    }
     this.carritoService.actualizarCantidad(item.id, cantidad).subscribe({
       next: () => {
         item.cantidad = cantidad;
@@ -158,11 +162,33 @@ export class CarritoComponent implements OnInit {
   }
 
   formatearFecha(event: any) {
-    let val = event.target.value.replace(/\D/g, ''); // solo números
-    if (val.length >= 2) {
+    let val = event.target.value.replace(/\D/g, '');
+    if (val.length > 2) {
       val = val.substring(0, 2) + '/' + val.substring(2, 4);
     }
-    event.target.value = val;
+    if (val.length >= 2) {
+      const mes = parseInt(val.substring(0, 2));
+      if (mes > 12) {
+        val = '12' + val.substring(2);
+      }
+      if (mes < 1 && val.length >= 2) {
+        val = '01' + val.substring(2);
+      }
+    }
     this.pago.fechaVencimiento = val;
+    event.target.value = val;
   }
+
+  soloLetras(event: any) {
+    event.target.value = event.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+    this.pago.nombreTitular = event.target.value;
+  }
+
+  soloNumerosTarjeta(event: KeyboardEvent) {
+    const charCode = event.which ? event.which : event.keyCode;
+    if (charCode < 48 || charCode > 57) {
+      event.preventDefault();
+    }
+  }
+
 }
