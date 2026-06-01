@@ -310,13 +310,31 @@ export class AdminPanelComponent implements OnInit, OnDestroy {
 
   getColorHex(nombre: string): string {
     const map: any = {
+      // básicos
       negro: '#1a1a1a', blanco: '#f5f5f5', gris: '#9e9e9e',
       rojo: '#e53935', azul: '#1e88e5', verde: '#43a047',
       amarillo: '#fdd835', naranja: '#fb8c00', rosa: '#e91e8c',
-      morado: '#8e24aa', beige: '#d7ccc8', cafe: '#6d4c41'
+      morado: '#8e24aa', beige: '#d7ccc8', cafe: '#6d4c41',
+      // nuevos
+      vino: '#7b1fa2',
+      camel: '#c19a6b',
+      mostaza: '#f9a825',
+      terracota: '#bf5e3b',
+      lila: '#ce93d8',
+      crema: '#fff8e1',
+      'verde oliva': '#827717',
+      'verde menta': '#80cbc4',
+      'verde sage': '#a5b89a',
+      'verde agua': '#4db6ac',
+      'rosa palo': '#f8bbd0',
+      'azul cielo': '#81d4fa',
+      'azul marino': '#0d2b6e',
+      'azul oscuro': '#1a237e',
+      'azul claro': '#90caf9',
     };
     return map[nombre.toLowerCase()] || '#888';
   }
+
 
   logout() {
     this.authService.logout();

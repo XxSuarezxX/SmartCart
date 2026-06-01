@@ -6,6 +6,7 @@ import { InteraccionService } from '../../../core/services/interaccion';
 import { AuthService } from '../../../core/services/auth';
 import { Router } from '@angular/router';
 import { PrecioPipe } from '../../../shared/pipes/precio-pipe';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-catalogo',
@@ -22,11 +23,13 @@ export class CatalogoComponent implements OnInit {
   categoriaSeleccionada = '';
   ordenSeleccionado = 'relevante';
   precioSeleccionado = '';
+  busquedaTexto = '';
 
   constructor(
     private productoService: ProductoService,
     private interaccionService: InteraccionService,
     private authService: AuthService,
+    private route: ActivatedRoute,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) { }
@@ -43,6 +46,13 @@ export class CatalogoComponent implements OnInit {
       this.categorias = data;
       this.cdr.detectChanges();
     });
+
+    this.route.queryParams.subscribe(params => {
+      if (params['q']) {
+        this.busquedaTexto = params['q'];
+        this.aplicarFiltros();
+      }
+    });
   }
 
   // Marca como likeados los productos que el usuario ya tiene en favoritos
@@ -58,6 +68,14 @@ export class CatalogoComponent implements OnInit {
 
   aplicarFiltros() {
     let resultado = [...this.productos];
+
+    if (this.busquedaTexto) {
+      resultado = resultado.filter(p =>
+        p.nombre.toLowerCase().includes(this.busquedaTexto.toLowerCase()) ||
+        p.descripcion?.toLowerCase().includes(this.busquedaTexto.toLowerCase()) ||
+        p.categoria?.nombre.toLowerCase().includes(this.busquedaTexto.toLowerCase())
+      );
+    }
 
     if (this.categoriaSeleccionada) {
       resultado = resultado.filter(p => p.categoria?.nombre === this.categoriaSeleccionada);

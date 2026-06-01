@@ -6,6 +6,7 @@ import { InteraccionService } from '../../../core/services/interaccion';
 import { AuthService } from '../../../core/services/auth';
 import { PrecioPipe } from '../../../shared/pipes/precio-pipe';
 import { CarritoService } from '../../../core/services/carrito';
+import { EstadoService } from '../../../core/services/estado';
 
 @Component({
   selector: 'app-detalle',
@@ -32,6 +33,7 @@ export class DetalleComponent implements OnInit {
     private interaccionService: InteraccionService,
     private authService: AuthService,
     private carritoService: CarritoService,
+    private estadoService: EstadoService,
     private cdr: ChangeDetectorRef
   ) { }
 
@@ -98,15 +100,27 @@ export class DetalleComponent implements OnInit {
       return;
     }
     this.liked = !this.liked;
-    const userId = this.authService.getUserId();
     if (this.liked) {
-      if (this.producto.categoria?.id) {
-        this.interaccionService.registrarInteraccion(
-          userId, this.producto.categoria.id, this.producto.id, 'LIKE'
-        ).subscribe();
+      const userId = this.authService.getUserId();
+      this.interaccionService.registrarInteraccion(
+        userId, this.producto.id, this.producto.categoria?.id, 'LIKE'
+      ).subscribe();
+
+      const favoritos = JSON.parse(localStorage.getItem('favoritos') || '[]');
+      const existe = favoritos.find((p: any) => p.id === this.producto.id);
+      if (!existe) {
+        favoritos.push({
+          id: this.producto.id,
+          nombre: this.producto.nombre,
+          precio: this.producto.precio,
+          urlImagen: this.producto.urlImagen  
+        });
+        localStorage.setItem('favoritos', JSON.stringify(favoritos));
       }
     } else {
-      this.interaccionService.quitarLike(userId, this.producto.id).subscribe();
+      const favoritos = JSON.parse(localStorage.getItem('favoritos') || '[]');
+      const nuevos = favoritos.filter((p: any) => p.id !== this.producto.id);
+      localStorage.setItem('favoritos', JSON.stringify(nuevos));
     }
     this.cdr.detectChanges();
   }

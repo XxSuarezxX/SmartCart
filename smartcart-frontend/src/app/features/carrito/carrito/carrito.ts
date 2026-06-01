@@ -6,6 +6,7 @@ import { CarritoService } from '../../../core/services/carrito';
 import { AuthService } from '../../../core/services/auth';
 import { InteraccionService } from '../../../core/services/interaccion';
 import { PrecioPipe } from '../../../shared/pipes/precio-pipe';
+import { EstadoService } from '../../../core/services/estado';
 
 @Component({
   selector: 'app-carrito',
@@ -34,6 +35,7 @@ export class CarritoComponent implements OnInit {
     private authService: AuthService,
     private interaccionService: InteraccionService,
     private router: Router,
+    private estadoService: EstadoService,
     private cdr: ChangeDetectorRef
   ) { }
 
@@ -50,13 +52,14 @@ export class CarritoComponent implements OnInit {
     this.carritoService.getCarrito(userId).subscribe({
       next: (data: any[]) => {
         this.items = data;
+        this.estadoService.actualizarCarrito(data);
         this.cargando = false;
         this.cdr.detectChanges();
       },
       error: () => {
         this.cargando = false;
         this.cdr.detectChanges();
-      }
+      },
     });
   }
 
@@ -85,6 +88,7 @@ export class CarritoComponent implements OnInit {
     this.carritoService.eliminarItem(item.id).subscribe({
       next: () => {
         this.items = this.items.filter(i => i.id !== item.id);
+        this.estadoService.actualizarCarrito(this.items);
         this.cdr.detectChanges();
       }
     });
@@ -95,6 +99,7 @@ export class CarritoComponent implements OnInit {
     this.carritoService.vaciarCarrito(userId).subscribe({
       next: () => {
         this.items = [];
+        this.estadoService.actualizarCarrito([]);
         this.cdr.detectChanges();
       }
     });
@@ -155,9 +160,9 @@ export class CarritoComponent implements OnInit {
   formatearFecha(event: any) {
     let val = event.target.value.replace(/\D/g, ''); // solo números
     if (val.length >= 2) {
-        val = val.substring(0, 2) + '/' + val.substring(2, 4);
+      val = val.substring(0, 2) + '/' + val.substring(2, 4);
     }
     event.target.value = val;
     this.pago.fechaVencimiento = val;
-}
+  }
 }

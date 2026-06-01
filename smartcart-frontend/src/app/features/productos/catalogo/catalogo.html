@@ -41,6 +41,10 @@
   <main class="catalogo-main">
     <div class="catalogo-header">
       <h2>Explorar Catálogo</h2>
+      <div class="search-catalogo" *ngIf="busquedaTexto">
+        <span>Resultados para: "{{ busquedaTexto }}"</span>
+        <button (click)="busquedaTexto=''; aplicarFiltros()">✕ Limpiar</button>
+      </div>
       <div class="ordenar">
         <label>Ordenar por:</label>
         <select [(ngModel)]="ordenSeleccionado" (change)="aplicarFiltros()">

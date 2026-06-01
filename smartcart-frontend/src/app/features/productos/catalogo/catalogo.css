@@ -220,3 +220,27 @@
   background: var(--terra);
   border-color: var(--terra);
 }
+
+.search-catalogo {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 0.875rem;
+  color: var(--sand-dim);
+}
+
+.search-catalogo button {
+  background: transparent;
+  border: 1px solid var(--clay-raised);
+  color: var(--sand-dim);
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.2s;
+}
+
+.search-catalogo button:hover {
+  border-color: var(--terra);
+  color: var(--terra);
+}

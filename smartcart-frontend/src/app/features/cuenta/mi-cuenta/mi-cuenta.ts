@@ -5,6 +5,8 @@ import { AuthService } from '../../../core/services/auth';
 import { CarritoService } from '../../../core/services/carrito';
 import { InteraccionService } from '../../../core/services/interaccion';
 import { PrecioPipe } from '../../../shared/pipes/precio-pipe';
+import { ActivatedRoute } from '@angular/router';
+import { EstadoService } from '../../../core/services/estado';
 
 @Component({
   selector: 'app-mi-cuenta',
@@ -25,8 +27,10 @@ export class MiCuentaComponent implements OnInit {
     private carritoService: CarritoService,
     private interaccionService: InteraccionService,
     private router: Router,
+    private route: ActivatedRoute,
+    private estadoService: EstadoService,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit() {
     if (!this.authService.isLoggedIn()) {
@@ -37,6 +41,15 @@ export class MiCuentaComponent implements OnInit {
     this.rol = this.authService.getRol() || 'CLIENTE';
     this.cargarFavoritos();
     this.cargarCompras();
+    this.estadoService.favoritos$.subscribe(favs => {
+      this.favoritos = favs;
+      this.cdr.detectChanges();
+    });
+    this.route.queryParams.subscribe(params => {
+      if (params['seccion']) {
+        this.setSeccion(params['seccion']);
+      }
+    });
   }
 
   cargarFavoritos() {
@@ -54,19 +67,19 @@ export class MiCuentaComponent implements OnInit {
   }
 
   cargarCompras() {
-  const userId = this.authService.getUserId();
-  this.carritoService.getHistorial(userId).subscribe({
-    next: (data: any[]) => {
-      this.compras = data;
-      console.log('Compras:', JSON.stringify(data)); // ← agrega esto
-      this.cdr.detectChanges();
-    },
-    error: () => {
-      this.compras = [];
-      this.cdr.detectChanges();
-    }
-  });
-}
+    const userId = this.authService.getUserId();
+    this.carritoService.getHistorial(userId).subscribe({
+      next: (data: any[]) => {
+        this.compras = data;
+        console.log('Compras:', JSON.stringify(data)); // ← agrega esto
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.compras = [];
+        this.cdr.detectChanges();
+      }
+    });
+  }
 
   setSeccion(seccion: string) {
     this.seccionActiva = seccion;
@@ -83,7 +96,7 @@ export class MiCuentaComponent implements OnInit {
   }
 
   toggleDetalle(compra: any) {
-  compra.abierto = !compra.abierto;
-  this.cdr.detectChanges();
-}
+    compra.abierto = !compra.abierto;
+    this.cdr.detectChanges();
+  }
 }
