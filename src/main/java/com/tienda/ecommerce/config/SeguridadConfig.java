@@ -30,31 +30,30 @@ public class SeguridadConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
-            .cors(cors -> cors.configurationSource(request -> {
-                CorsConfiguration config = new CorsConfiguration();
-                config.setAllowedOrigins(List.of(
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(request -> {
+            CorsConfiguration config = new CorsConfiguration();
+            config.setAllowedOrigins(List.of(
                     "http://localhost:4200",
                     "http://localhost:8080",
                     "https://smartcart-production-3c30.up.railway.app"
-                ));
-                config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-                config.setAllowedHeaders(List.of("*"));
-                config.setExposedHeaders(List.of("Authorization"));
-                config.setAllowCredentials(true);
-                return config;
-            }))
-            .authorizeHttpRequests(auth -> auth
+            ));
+            config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+            config.setAllowedHeaders(List.of("*"));
+            config.setExposedHeaders(List.of("Authorization"));
+            config.setAllowCredentials(true);
+            return config;
+        }))
+                .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
+                .requestMatchers("/", "/index.html", "/*.js", "/*.css", "/*.ico", "/*.txt", "/*.json").permitAll()
+                .requestMatchers("/assets/**").permitAll()
                 // API pública
                 .requestMatchers("/api/auth/login", "/api/auth/registro").permitAll()
                 .requestMatchers("/api/interacciones/registrar").permitAll()
                 .requestMatchers("/api/interacciones/sugeridos/**").permitAll()
-
                 // Endpoints públicos no /api
                 .requestMatchers(HttpMethod.GET, "/productos/**").permitAll()
-
                 // Solo admin
                 .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/auth/usuarios").hasAuthority("ADMIN")
@@ -64,16 +63,14 @@ public class SeguridadConfig {
                 .requestMatchers(HttpMethod.POST, "/productos/**").hasAuthority("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/productos/**").hasAuthority("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/productos/**").hasAuthority("ADMIN")
-
                 // Requiere sesión
                 .requestMatchers("/api/pagos/**").authenticated()
                 .requestMatchers("/api/interacciones/**").authenticated()
-
                 // Todo lo demás público: Angular, assets, index, chunks, rutas SPA
                 .anyRequest().permitAll()
-            )
-            .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                )
+                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
