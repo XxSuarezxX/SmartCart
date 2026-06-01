@@ -31,6 +31,9 @@
     <sonar.projectKey>com.tienda:ecommerce</sonar.projectKey>
     <sonar.host.url>http://localhost:9000</sonar.host.url>
     <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+    <!-- Versiones de las herramientas de QA -->
+    <selenium.version>4.27.0</selenium.version>
+    <jmeter-maven-plugin.version>3.8.0</jmeter-maven-plugin.version>
 </properties>
     <dependencies>
 
@@ -85,6 +88,15 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Selenium WebDriver para las pruebas E2E (interfaz web).
+             Solo se usan en el perfil/grupo 'e2e', no en la build normal. -->
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+            <version>${selenium.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -194,7 +206,44 @@
     </executions>
 </plugin>
 
+            <!-- Por defecto la build NO ejecuta las pruebas E2E (grupo 'e2e'),
+                 ya que necesitan la aplicación corriendo y un navegador.
+                 En el pipeline se activan con: -Dgroups=e2e -DexcludedGroups= -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <excludedGroups>e2e</excludedGroups>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
+
+    <profiles>
+        <!-- Perfil 'jmeter': pruebas de carga/rendimiento con Apache JMeter.
+             No se activa en la build normal. En el pipeline se ejecuta con:
+             ./mvnw -Pjmeter jmeter:configuration jmeter:jmeter jmeter:results
+             Los planes de prueba viven en src/test/jmeter/*.jmx -->
+        <profile>
+            <id>jmeter</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.lazerycode.jmeter</groupId>
+                        <artifactId>jmeter-maven-plugin</artifactId>
+                        <version>${jmeter-maven-plugin.version}</version>
+                        <configuration>
+                            <!-- Genera un reporte HTML navegable en target/jmeter/reports -->
+                            <generateReports>true</generateReports>
+                            <testResultsTimestamp>false</testResultsTimestamp>
+                            <!-- Falla la build si más del 5% de las peticiones dan error -->
+                            <errorRateThresholdInPercent>5</errorRateThresholdInPercent>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>
