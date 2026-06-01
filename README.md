@@ -145,3 +145,77 @@ Docker Compose lo carga automáticamente al hacer `up`.
 **"Port 5432 is already allocated"** → Tenés PostgreSQL instalado localmente corriendo. Detenelo o cambiá el puerto en `docker-compose.yml`.
 
 **El build tarda mucho** → Normal la primera vez. Maven descarga todas las dependencias dentro del contenedor.
+
+---
+
+# Integración Continua (CI/CD) — GitHub Actions
+
+El pipeline está definido en [`.github/workflows/ci.yml`](.github/workflows/ci.yml) y se ejecuta
+automáticamente en cada `push` y cada Pull Request hacia `main`. Consta de cuatro etapas:
+
+```
+unit-tests ──┬──► sonarqube
+             ├──► selenium
+             └──► jmeter
+```
+
+| Etapa | Herramienta | Qué hace |
+|-------|-------------|----------|
+| **unit-tests** | JUnit 5 + Mockito + JaCoCo | Compila, ejecuta las pruebas unitarias (H2 en memoria), genera el reporte de cobertura y empaqueta el `.jar`. |
+| **sonarqube** | SonarQube / SonarCloud | Análisis estático de calidad y cobertura. Se omite si no hay token configurado. |
+| **selenium** | Selenium WebDriver | Levanta la app (con PostgreSQL) y valida la interfaz web en un Chrome headless. |
+| **jmeter** | Apache JMeter | Levanta la app y ejecuta una prueba de carga sobre los endpoints públicos. |
+
+Los resultados (reportes de tests, cobertura JaCoCo, reporte HTML de JMeter, logs) se publican como
+**artifacts** descargables en la pestaña *Actions* de cada ejecución.
+
+## 1. Pruebas unitarias
+
+Ya existen en `src/test/java`. Para ejecutarlas en local:
+
+```bash
+./mvnw verify          # tests + cobertura JaCoCo en target/site/jacoco/index.html
+```
+
+## 2. SonarQube
+
+El análisis requiere dos secretos del repositorio
+(*Settings → Secrets and variables → Actions*):
+
+| Nombre | Tipo | Valor |
+|--------|------|-------|
+| `SONAR_TOKEN` | Secret | Token de tu instancia de SonarQube / SonarCloud |
+| `SONAR_HOST_URL` | Secret | URL del servidor (ej. `https://sonarcloud.io`) |
+| `SONAR_ORGANIZATION` | Variable | (Solo SonarCloud) la organización |
+
+Si `SONAR_TOKEN` no está definido, la etapa **no falla**: simplemente se omite con un aviso.
+
+En local (con un SonarQube en `http://localhost:9000`):
+
+```bash
+./mvnw verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+  -Dsonar.host.url=http://localhost:9000 -Dsonar.token=TU_TOKEN
+```
+
+## 3. Selenium (E2E)
+
+Las pruebas están en `src/test/java/com/tienda/ecommerce/e2e` y llevan la etiqueta `@Tag("e2e")`,
+por lo que **no** corren en la build normal (necesitan la app levantada y un navegador).
+
+Para ejecutarlas en local, con la app corriendo en `http://localhost:8080` y Chrome instalado:
+
+```bash
+./mvnw test -Dgroups=e2e -DexcludedGroups= -De2e.base-url=http://localhost:8080
+```
+
+## 4. JMeter (carga)
+
+El plan de prueba está en [`src/test/jmeter/smartcart_load_test.jmx`](src/test/jmeter/smartcart_load_test.jmx).
+El plugin de Maven descarga JMeter automáticamente. Con la app corriendo:
+
+```bash
+./mvnw -Pjmeter jmeter:configuration jmeter:jmeter jmeter:results
+```
+
+El reporte HTML se genera en `target/jmeter/reports/`. Parámetros ajustables (con `-D`):
+`threads` (usuarios, 10), `loops` (iteraciones, 5), `rampup` (segundos, 5), `host`, `port`.
