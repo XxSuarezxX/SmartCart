@@ -240,6 +240,34 @@
                             <!-- Falla la build si más del 5% de las peticiones dan error -->
                             <errorRateThresholdInPercent>5</errorRateThresholdInPercent>
                         </configuration>
+                        <!-- Los goals deben enlazarse al ciclo de vida: el goal 'jmeter'
+                             busca la configuración creada por la ejecución 'configuration'.
+                             Se disparan todos con: ./mvnw -Pjmeter verify
+                             (NO usar -DskipTests: el plugin también lo respeta y se
+                              saltaría la prueba de carga -> "Performance tests are skipped")
+                               - configure -> process-test-resources
+                               - jmeter    -> integration-test
+                               - results   -> verify  (falla si se supera el umbral de error) -->
+                        <executions>
+                            <execution>
+                                <id>configuration</id>
+                                <goals>
+                                    <goal>configure</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>jmeter-tests</id>
+                                <goals>
+                                    <goal>jmeter</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>jmeter-check-results</id>
+                                <goals>
+                                    <goal>results</goal>
+                                </goals>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>

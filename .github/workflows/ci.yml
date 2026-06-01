@@ -278,10 +278,11 @@ jobs:
 
       # El jmeter-maven-plugin descarga JMeter, ejecuta src/test/jmeter/*.jmx
       # y comprueba el porcentaje de error (falla si supera el umbral del pom).
+      # Los goals (configure -> jmeter -> results) van enlazados al ciclo de vida,
+      # por eso se lanza con 'verify'. OJO: no usar -DskipTests, porque el plugin
+      # de JMeter también lo respeta y se saltaría la prueba de carga.
       - name: Ejecutar prueba de carga con JMeter
-        run: |
-          ./mvnw --batch-mode --no-transfer-progress -Pjmeter \
-            jmeter:configuration jmeter:jmeter jmeter:results
+        run: ./mvnw --batch-mode --no-transfer-progress -Pjmeter verify
 
       - name: Detener la aplicacion
         if: always()
