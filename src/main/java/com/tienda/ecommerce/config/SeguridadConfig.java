@@ -46,6 +46,7 @@ public class SeguridadConfig {
         }))
                 .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/chunk-*.js", "/main-*.js", "/styles-*.css", "/3rdpartylicenses.txt", "/prerendered-routes.json").permitAll()
                 .requestMatchers("/", "/index.html", "/*.js", "/*.css", "/*.ico", "/*.txt", "/*.json").permitAll()
                 .requestMatchers("/assets/**").permitAll()
                 // API pública
