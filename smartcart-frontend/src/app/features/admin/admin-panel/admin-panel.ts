@@ -308,33 +308,65 @@ export class AdminPanelComponent implements OnInit, OnDestroy {
     });
   }
 
-  getColorHex(nombre: string): string {
-    const map: any = {
-      // básicos
-      negro: '#1a1a1a', blanco: '#f5f5f5', gris: '#9e9e9e',
-      rojo: '#e53935', azul: '#1e88e5', verde: '#43a047',
-      amarillo: '#fdd835', naranja: '#fb8c00', rosa: '#e91e8c',
-      morado: '#8e24aa', beige: '#d7ccc8', cafe: '#6d4c41',
-      // nuevos
-      vino: '#7b1fa2',
-      camel: '#c19a6b',
-      mostaza: '#f9a825',
-      terracota: '#bf5e3b',
-      lila: '#ce93d8',
-      crema: '#fff8e1',
-      'verde oliva': '#827717',
-      'verde menta': '#80cbc4',
-      'verde sage': '#a5b89a',
-      'verde agua': '#4db6ac',
-      'rosa palo': '#f8bbd0',
-      'azul cielo': '#81d4fa',
-      'azul marino': '#0d2b6e',
-      'azul oscuro': '#1a237e',
-      'azul claro': '#90caf9',
-    };
-    return map[nombre.toLowerCase()] || '#888';
-  }
-
+  getColorHex(color: string): string {
+  const colores: { [key: string]: string } = {
+    'negro': '#1a1a1a',
+    'blanco': '#f5f5f5',
+    'gris': '#9e9e9e',
+    'gris oscuro': '#4a4a4a',
+    'gris claro': '#d4d4d4',
+    'cafe': '#8B4513',
+    'café': '#8B4513',
+    'cafe claro': '#c8a07a',
+    'cafe oscuro': '#5c2e00',
+    'marron': '#795548',
+    'marrón': '#795548',
+    'azul': '#1e88e5',
+    'azul navy': '#1e3a8a',
+    'azul claro': '#64b5f6',
+    'azul oscuro': '#0d47a1',
+    'azul cielo': '#87ceeb',
+    'azul petroleo': '#006064',
+    'verde': '#43a047',
+    'verde oliva': '#556B2F',
+    'verde militar': '#4a5240',
+    'verde menta': '#98ff98',
+    'verde oscuro': '#1b5e20',
+    'verde claro': '#a5d6a7',
+    'rojo': '#dc2626',
+    'rojo oscuro': '#b71c1c',
+    'rojo vino': '#7b1c2c',
+    'vino': '#7b1c2c',
+    'bordo': '#800020',
+    'burdeos': '#800020',
+    'rosa': '#ec4899',
+    'rosa claro': '#f8bbd0',
+    'rosa oscuro': '#c2185b',
+    'fucsia': '#ff006e',
+    'naranja': '#fb8c00',
+    'naranja claro': '#ffcc80',
+    'naranja oscuro': '#e65100',
+    'amarillo': '#fdd835',
+    'amarillo claro': '#fff9c4',
+    'mostaza': '#f0a500',
+    'dorado': '#ffd700',
+    'morado': '#8e24aa',
+    'lila': '#ce93d8',
+    'violeta': '#7b1fa2',
+    'lavanda': '#b39ddb',
+    'beige': '#d7ccc8',
+    'crema': '#fffdd0',
+    'arena': '#f5deb3',
+    'salmon': '#fa8072',
+    'coral': '#ff6b6b',
+    'turquesa': '#00bcd4',
+    'menta': '#98ff98',
+    'plateado': '#c0c0c0',
+    'plata': '#c0c0c0',
+    'cobre': '#b87333',
+  };
+  return colores[color.trim().toLowerCase()] || '#888';
+}
 
   logout() {
     this.authService.logout();
