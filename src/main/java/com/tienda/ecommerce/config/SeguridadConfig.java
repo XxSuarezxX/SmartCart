@@ -71,6 +71,7 @@ public class SeguridadConfig {
                         .requestMatchers("/api/pagos/**").authenticated()
                         .requestMatchers("/api/interacciones/**").authenticated()
                         .requestMatchers("/carrito/**").authenticated()
+                        .requestMatchers("/", "/index.html", "/*.js", "/*.css", "/*.ico", "/assets/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
