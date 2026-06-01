@@ -239,7 +239,46 @@
                             <testResultsTimestamp>false</testResultsTimestamp>
                             <!-- Falla la build si más del 5% de las peticiones dan error -->
                             <errorRateThresholdInPercent>5</errorRateThresholdInPercent>
+                            <!-- Permite saltar las unitarias con -DskipTests SIN saltar la
+                                 prueba de carga (el override ignora el ${skipTests} global) -->
+                            <skipTests>false</skipTests>
+                            <!-- Forzar IPv4 en la JVM de JMeter: en CI 'localhost' puede
+                                 resolver a IPv6 (::1) mientras la app escucha solo en IPv4,
+                                 lo que provoca 100% de errores de conexion. -->
+                            <jMeterProcessJVMSettings>
+                                <arguments>
+                                    <argument>-Djava.net.preferIPv4Stack=true</argument>
+                                </arguments>
+                            </jMeterProcessJVMSettings>
                         </configuration>
+                        <!-- Los goals deben enlazarse al ciclo de vida: el goal 'jmeter'
+                             busca la configuración creada por la ejecución 'configuration'.
+                             Se disparan todos con: ./mvnw -Pjmeter -DskipTests verify
+                             (-DskipTests salta solo las unitarias; la carga corre igual
+                              gracias a <skipTests>false</skipTests> de arriba)
+                               - configure -> process-test-resources
+                               - jmeter    -> integration-test
+                               - results   -> verify  (falla si se supera el umbral de error) -->
+                        <executions>
+                            <execution>
+                                <id>configuration</id>
+                                <goals>
+                                    <goal>configure</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>jmeter-tests</id>
+                                <goals>
+                                    <goal>jmeter</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>jmeter-check-results</id>
+                                <goals>
+                                    <goal>results</goal>
+                                </goals>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>
