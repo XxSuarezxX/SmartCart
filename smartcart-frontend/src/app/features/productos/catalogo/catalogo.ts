@@ -35,11 +35,23 @@ export class CatalogoComponent implements OnInit {
     this.productoService.getProductos().subscribe(data => {
       this.productos = data.map(p => ({ ...p, liked: false }));
       this.productosFiltrados = [...this.productos];
+      this.marcarFavoritos();
       this.cdr.detectChanges();
     });
 
     this.productoService.getCategorias().subscribe(data => {
       this.categorias = data;
+      this.cdr.detectChanges();
+    });
+  }
+
+  // Marca como likeados los productos que el usuario ya tiene en favoritos
+  private marcarFavoritos() {
+    if (!this.authService.isLoggedIn()) return;
+    const userId = this.authService.getUserId();
+    this.interaccionService.getLikes(userId).subscribe(likes => {
+      const ids = new Set(likes.map((p: any) => p.id));
+      this.productos.forEach(p => p.liked = ids.has(p.id));
       this.cdr.detectChanges();
     });
   }
@@ -87,11 +99,15 @@ export class CatalogoComponent implements OnInit {
     event.stopPropagation();
     if (!this.authService.isLoggedIn()) return;
     producto.liked = !producto.liked;
+    const usuarioId = this.authService.getUserId();
     if (producto.liked) {
-      const usuarioId = this.authService.getUserId();
-      this.interaccionService.registrarInteraccion(
-        usuarioId, producto.categoria?.id, 'LIKE'
-      ).subscribe();
+      if (producto.categoria?.id) {
+        this.interaccionService.registrarInteraccion(
+          usuarioId, producto.categoria.id, producto.id, 'LIKE'
+        ).subscribe();
+      }
+    } else {
+      this.interaccionService.quitarLike(usuarioId, producto.id).subscribe();
     }
     this.cdr.detectChanges();
   }
@@ -114,7 +130,7 @@ export class CatalogoComponent implements OnInit {
     if (this.authService.isLoggedIn() && producto.categoria?.id) {
       const usuarioId = this.authService.getUserId();
       this.interaccionService.registrarInteraccion(
-        usuarioId, producto.categoria.id, 'CARRITO'
+        usuarioId, producto.categoria.id, producto.id, 'CARRITO'
       ).subscribe();
     }
   }

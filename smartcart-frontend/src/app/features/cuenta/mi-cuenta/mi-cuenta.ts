@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth';
 import { CarritoService } from '../../../core/services/carrito';
+import { InteraccionService } from '../../../core/services/interaccion';
 import { PrecioPipe } from '../../../shared/pipes/precio-pipe';
 
 @Component({
@@ -22,6 +23,7 @@ export class MiCuentaComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private carritoService: CarritoService,
+    private interaccionService: InteraccionService,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
@@ -33,8 +35,22 @@ export class MiCuentaComponent implements OnInit {
     }
     this.username = this.authService.getUsername() || '';
     this.rol = this.authService.getRol() || 'CLIENTE';
-    this.favoritos = JSON.parse(localStorage.getItem('favoritos') || '[]');
+    this.cargarFavoritos();
     this.cargarCompras();
+  }
+
+  cargarFavoritos() {
+    const userId = this.authService.getUserId();
+    this.interaccionService.getLikes(userId).subscribe({
+      next: (data: any[]) => {
+        this.favoritos = data;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.favoritos = [];
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   cargarCompras() {

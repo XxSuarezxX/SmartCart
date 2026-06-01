@@ -6,6 +6,7 @@ import com.tienda.ecommerce.recomendacion.model.Interaccion;
 import com.tienda.ecommerce.recomendacion.repository.InteraccionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -18,6 +19,14 @@ public class RecomendacionService {
     public Interaccion guardarInteraccion(Interaccion interaccion) {
         // La lógica de negocio se queda aquí
         String tipo = interaccion.getTipo() == null ? "" : interaccion.getTipo().toUpperCase();
+
+        // Un LIKE es un toggle por producto: si ya existe, no lo duplicamos.
+        if ("LIKE".equals(tipo) && interaccion.getProductoId() != null
+                && interaccionRepository.existsByUsuarioIdAndProductoIdAndTipo(
+                        interaccion.getUsuarioId(), interaccion.getProductoId(), "LIKE")) {
+            return interaccion;
+        }
+
         int puntos = switch (tipo) {
             case "LIKE" -> 1;
             case "CARRITO" -> 2;
@@ -27,6 +36,16 @@ public class RecomendacionService {
 
         interaccion.setPuntos(puntos);
         return interaccionRepository.save(interaccion);
+    }
+
+    @Transactional
+    public void quitarLike(Long usuarioId, Long productoId) {
+        interaccionRepository.deleteByUsuarioIdAndProductoIdAndTipo(usuarioId, productoId, "LIKE");
+    }
+
+    public List<Producto> obtenerLikes(Long usuarioId) {
+        List<Long> productoIds = interaccionRepository.findProductoIdsByUsuarioYTipo(usuarioId, "LIKE");
+        return productoRepository.findAllById(productoIds);
     }
 
     @Autowired

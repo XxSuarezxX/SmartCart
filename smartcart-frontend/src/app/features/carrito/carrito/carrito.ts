@@ -117,17 +117,16 @@ export class CarritoComponent implements OnInit {
       ...this.pago
     }).subscribe({
       next: () => {
-        // Registramos una interacción de COMPRA por cada categoría distinta
-        // del carrito, antes de vaciarlo.
-        const categorias = new Set<number>();
+        // Registramos una interacción de COMPRA por cada producto del carrito,
+        // antes de vaciarlo.
         this.items.forEach(item => {
           const categoriaId = item.producto?.categoria?.id;
-          if (categoriaId) categorias.add(categoriaId);
-        });
-        categorias.forEach(categoriaId => {
-          this.interaccionService.registrarInteraccion(
-            userId, categoriaId, 'COMPRA'
-          ).subscribe();
+          const productoId = item.producto?.id;
+          if (categoriaId && productoId) {
+            this.interaccionService.registrarInteraccion(
+              userId, categoriaId, productoId, 'COMPRA'
+            ).subscribe();
+          }
         });
 
         this.pagoExitoso = true;

@@ -16,12 +16,13 @@ export class InteraccionService {
     });
   }
 
-  // 2. Agregamos 'tipo' para que tu backend sepa si es VER, AGREGAR o COMPRA
-  registrarInteraccion(usuarioId: number, categoriaId: number, tipo: string) {
+  // 2. Agregamos 'tipo' para que tu backend sepa si es LIKE, CARRITO o COMPRA
+  registrarInteraccion(usuarioId: number, categoriaId: number, productoId: number, tipo: string) {
       // Declaramos las llaves del JSON explícitamente para que coincidan con tu Java
       const body = {
         usuarioId: usuarioId,
         categoriaId: categoriaId,
+        productoId: productoId,
         tipo: tipo
       };
 
@@ -34,6 +35,21 @@ export class InteraccionService {
   // 3. Retorna un Observable con la lista de productos recomendados
   getSugeridos(usuarioId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/api/interacciones/sugeridos/${usuarioId}`,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  // 4. Productos a los que el usuario les dio like ("Mis Favoritos")
+  getLikes(usuarioId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/api/interacciones/likes/${usuarioId}`,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  // 5. Quita el like de un producto
+  quitarLike(usuarioId: number, productoId: number): Observable<any> {
+    return this.http.delete(
+      `${this.apiUrl}/api/interacciones/like?usuarioId=${usuarioId}&productoId=${productoId}`,
       { headers: this.getHeaders() }
     );
   }

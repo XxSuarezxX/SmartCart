@@ -35,6 +35,7 @@ export class RecomendadosComponent implements OnInit {
       this.interaccionService.getSugeridos(userId).subscribe({
         next: (data: any[]) => {
           this.recomendados = data.map(p => ({ ...p, liked: false }));
+          this.marcarFavoritos();
           this.cargando = false;
           this.cdr.detectChanges();
         },
@@ -56,6 +57,17 @@ export class RecomendadosComponent implements OnInit {
     });
   }
 
+  // Marca como likeados los productos recomendados que ya están en favoritos
+  private marcarFavoritos() {
+    if (!this.isLoggedIn) return;
+    const userId = this.authService.getUserId();
+    this.interaccionService.getLikes(userId).subscribe(likes => {
+      const ids = new Set(likes.map((p: any) => p.id));
+      this.recomendados.forEach(p => p.liked = ids.has(p.id));
+      this.cdr.detectChanges();
+    });
+  }
+
   irADetalle(producto: any) {
     if (this.isLoggedIn && producto.categoria?.id) {
       const userId = this.authService.getUserId();
@@ -73,14 +85,19 @@ export class RecomendadosComponent implements OnInit {
 
     producto.liked = !producto.liked;
 
-    if (producto.liked && producto.categoria?.id) {
-      const userId = this.authService.getUserId();
-      // Enviamos el 'LIKE' exacto que tu Java mapea
-      this.interaccionService.registrarInteraccion(
-        userId,
-        producto.categoria.id,
-        'LIKE'
-      ).subscribe();
+    const userId = this.authService.getUserId();
+    if (producto.liked) {
+      if (producto.categoria?.id) {
+        // Enviamos el 'LIKE' exacto que tu Java mapea
+        this.interaccionService.registrarInteraccion(
+          userId,
+          producto.categoria.id,
+          producto.id,
+          'LIKE'
+        ).subscribe();
+      }
+    } else {
+      this.interaccionService.quitarLike(userId, producto.id).subscribe();
     }
     this.cdr.detectChanges();
   }

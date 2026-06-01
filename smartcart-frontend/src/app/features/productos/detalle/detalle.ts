@@ -57,6 +57,7 @@ export class DetalleComponent implements OnInit {
           ? data.urlImagen.split(',').map((url: string) => url.trim()).filter((url: string) => url.length > 0)
           : [];
         if (this.imagenes.length === 0) this.imagenes = [''];
+        this.marcarFavorito();
         this.cdr.detectChanges();
       },
       error: () => {
@@ -64,6 +65,16 @@ export class DetalleComponent implements OnInit {
         this.router.navigate(['/']);
       }
 
+    });
+  }
+
+  // Marca el corazón si el usuario ya tiene este producto en favoritos
+  private marcarFavorito() {
+    if (!this.authService.isLoggedIn() || !this.producto) return;
+    const userId = this.authService.getUserId();
+    this.interaccionService.getLikes(userId).subscribe(likes => {
+      this.liked = likes.some((p: any) => p.id === this.producto.id);
+      this.cdr.detectChanges();
     });
   }
 
@@ -87,22 +98,15 @@ export class DetalleComponent implements OnInit {
       return;
     }
     this.liked = !this.liked;
+    const userId = this.authService.getUserId();
     if (this.liked) {
-      const userId = this.authService.getUserId();
-      this.interaccionService.registrarInteraccion(
-        userId, this.producto.categoria?.id, 'LIKE'
-      ).subscribe();
-
-      const favoritos = JSON.parse(localStorage.getItem('favoritos') || '[]');
-      const existe = favoritos.find((p: any) => p.id === this.producto.id);
-      if (!existe) {
-        favoritos.push(this.producto);
-        localStorage.setItem('favoritos', JSON.stringify(favoritos));
+      if (this.producto.categoria?.id) {
+        this.interaccionService.registrarInteraccion(
+          userId, this.producto.categoria.id, this.producto.id, 'LIKE'
+        ).subscribe();
       }
     } else {
-      const favoritos = JSON.parse(localStorage.getItem('favoritos') || '[]');
-      const nuevos = favoritos.filter((p: any) => p.id !== this.producto.id);
-      localStorage.setItem('favoritos', JSON.stringify(nuevos));
+      this.interaccionService.quitarLike(userId, this.producto.id).subscribe();
     }
     this.cdr.detectChanges();
   }
@@ -121,7 +125,7 @@ export class DetalleComponent implements OnInit {
       next: () => {
         if (this.producto.categoria?.id) {
           this.interaccionService.registrarInteraccion(
-            userId, this.producto.categoria.id, 'CARRITO'
+            userId, this.producto.categoria.id, this.producto.id, 'CARRITO'
           ).subscribe();
         }
         this.router.navigate(['/carrito']);

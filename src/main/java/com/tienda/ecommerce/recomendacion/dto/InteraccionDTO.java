@@ -7,5 +7,6 @@ import lombok.Setter;
 public class InteraccionDTO {
     private Long usuarioId;
     private Long categoriaId;
+    private Long productoId;
     private String tipo;
 }
