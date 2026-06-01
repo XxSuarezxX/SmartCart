@@ -1,6 +1,7 @@
 package com.tienda.ecommerce.recomendacion.repository;
 
 import com.tienda.ecommerce.recomendacion.model.Interaccion;
+import com.tienda.ecommerce.recomendacion.model.TipoInteraccion;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -17,12 +18,12 @@ public interface InteraccionRepository extends JpaRepository<Interaccion, Long> 
     List<Object[]> findRankingCategoriasGlobal();
 
     // ¿El usuario ya tiene una interacción de este tipo sobre este producto?
-    boolean existsByUsuarioIdAndProductoIdAndTipo(Long usuarioId, Long productoId, String tipo);
+    boolean existsByUsuarioIdAndProductoIdAndTipo(Long usuarioId, Long productoId, TipoInteraccion tipo);
 
     // Elimina las interacciones de un tipo (ej: LIKE) de un producto para un usuario
-    void deleteByUsuarioIdAndProductoIdAndTipo(Long usuarioId, Long productoId, String tipo);
+    void deleteByUsuarioIdAndProductoIdAndTipo(Long usuarioId, Long productoId, TipoInteraccion tipo);
 
     // IDs de productos sobre los que el usuario tiene una interacción de cierto tipo
     @Query("SELECT DISTINCT i.productoId FROM Interaccion i WHERE i.usuarioId = ?1 AND i.tipo = ?2 AND i.productoId IS NOT NULL")
-    List<Long> findProductoIdsByUsuarioYTipo(Long usuarioId, String tipo);
+    List<Long> findProductoIdsByUsuarioYTipo(Long usuarioId, TipoInteraccion tipo);
 }

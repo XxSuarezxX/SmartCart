@@ -13,7 +13,10 @@ public class Interaccion {
     private Long id;
     private Long usuarioId;
     private Long productoId;
-    private String tipo; // "LIKE", "CARRITO", "COMPRA"
+
+    @Enumerated(EnumType.STRING)
+    private TipoInteraccion tipo;
+
     private int puntos;
     private LocalDateTime fecha = LocalDateTime.now();
     private Long categoriaId;

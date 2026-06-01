@@ -35,5 +35,3 @@ public class EcommerceApplication {
     }
 
 }
-
-//correos y productos 

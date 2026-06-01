@@ -29,8 +29,9 @@ public class Pago {
     @Column(nullable = false)
     private LocalDateTime fechaPago;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String estado; // "EXITOSO", "RECHAZADO"
+    private EstadoPago estado;
 
     private String direccionEnvio;
 

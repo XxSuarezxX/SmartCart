@@ -3,13 +3,13 @@ package com.tienda.ecommerce.recomendacion.service;
 import com.tienda.ecommerce.productos.model.Producto;
 import com.tienda.ecommerce.productos.repository.ProductoRepository;
 import com.tienda.ecommerce.recomendacion.model.Interaccion;
+import com.tienda.ecommerce.recomendacion.model.TipoInteraccion;
 import com.tienda.ecommerce.recomendacion.repository.InteraccionRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -20,6 +20,7 @@ import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -35,15 +36,10 @@ class RecomendacionServiceTest {
     @InjectMocks
     private RecomendacionService recomendacionService;
 
-    @ParameterizedTest(name = "tipo \"{0}\" => {1} puntos")
-    @CsvSource({
-            "LIKE,1",
-            "CARRITO,2",
-            "COMPRA,3",
-            "OTRO,0"
-    })
-    @DisplayName("guardarInteraccion() asigna los puntos segun el tipo")
-    void guardarInteraccion_asignaPuntosSegunTipo(String tipo, int puntosEsperados) {
+    @ParameterizedTest(name = "tipo {0} => {1} puntos")
+    @EnumSource(TipoInteraccion.class)
+    @DisplayName("guardarInteraccion() toma los puntos del propio tipo")
+    void guardarInteraccion_asignaPuntosSegunTipo(TipoInteraccion tipo) {
         Interaccion interaccion = new Interaccion();
         interaccion.setTipo(tipo);
         when(interaccionRepository.save(any(Interaccion.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -52,38 +48,35 @@ class RecomendacionServiceTest {
 
         ArgumentCaptor<Interaccion> captor = ArgumentCaptor.forClass(Interaccion.class);
         verify(interaccionRepository).save(captor.capture());
-        assertThat(captor.getValue().getPuntos()).isEqualTo(puntosEsperados);
-        assertThat(resultado.getPuntos()).isEqualTo(puntosEsperados);
+        assertThat(captor.getValue().getPuntos()).isEqualTo(tipo.getPuntos());
+        assertThat(resultado.getPuntos()).isEqualTo(tipo.getPuntos());
     }
 
-    @ParameterizedTest(name = "tipo \"{0}\" en minusculas también suma puntos")
-    @CsvSource({
-            "like,1",
-            "carrito,2",
-            "compra,3"
-    })
-    @DisplayName("guardarInteraccion() normaliza el tipo a mayusculas")
-    void guardarInteraccion_normalizaTipo(String tipo, int puntosEsperados) {
-        Interaccion interaccion = new Interaccion();
-        interaccion.setTipo(tipo);
-        when(interaccionRepository.save(any(Interaccion.class))).thenAnswer(inv -> inv.getArgument(0));
-
-        Interaccion resultado = recomendacionService.guardarInteraccion(interaccion);
-
-        assertThat(resultado.getPuntos()).isEqualTo(puntosEsperados);
-    }
-
-    @ParameterizedTest
-    @NullSource
+    @Test
     @DisplayName("guardarInteraccion() asigna 0 puntos cuando el tipo es null")
-    void guardarInteraccion_tipoNull_asignaCeroPuntos(String tipo) {
+    void guardarInteraccion_tipoNull_asignaCeroPuntos() {
         Interaccion interaccion = new Interaccion();
-        interaccion.setTipo(tipo);
+        interaccion.setTipo(null);
         when(interaccionRepository.save(any(Interaccion.class))).thenAnswer(inv -> inv.getArgument(0));
 
         Interaccion resultado = recomendacionService.guardarInteraccion(interaccion);
 
         assertThat(resultado.getPuntos()).isZero();
+    }
+
+    @Test
+    @DisplayName("guardarInteraccion() no duplica un LIKE existente sobre el mismo producto")
+    void guardarInteraccion_likeDuplicado_noGuarda() {
+        Interaccion interaccion = new Interaccion();
+        interaccion.setUsuarioId(1L);
+        interaccion.setProductoId(10L);
+        interaccion.setTipo(TipoInteraccion.LIKE);
+        when(interaccionRepository.existsByUsuarioIdAndProductoIdAndTipo(1L, 10L, TipoInteraccion.LIKE))
+                .thenReturn(true);
+
+        recomendacionService.guardarInteraccion(interaccion);
+
+        verify(interaccionRepository, never()).save(any());
     }
 
     @Test

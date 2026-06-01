@@ -1,5 +1,6 @@
 package com.tienda.ecommerce.usuarios.service;
 
+import com.tienda.ecommerce.common.exception.CredencialesInvalidasException;
 import com.tienda.ecommerce.usuarios.dto.LoginResponse;
 import com.tienda.ecommerce.usuarios.model.Usuario;
 import com.tienda.ecommerce.usuarios.repository.UsuarioRepository;
@@ -96,7 +97,7 @@ class UsuarioServiceTest {
         when(usuarioRepository.findByEmail("nadie@test.com")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> usuarioService.autenticar("nadie@test.com", "x"))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(CredencialesInvalidasException.class)
                 .hasMessage("Credenciales incorrectas");
 
         verify(jwtUtil, never()).generarToken(any());
@@ -110,7 +111,7 @@ class UsuarioServiceTest {
         when(passwordEncoder.matches("mala", "HASH")).thenReturn(false);
 
         assertThatThrownBy(() -> usuarioService.autenticar("juan@test.com", "mala"))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(CredencialesInvalidasException.class)
                 .hasMessage("Credenciales incorrectas");
 
         verify(jwtUtil, never()).generarToken(any());

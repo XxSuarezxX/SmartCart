@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 
 import com.tienda.ecommerce.admin.dto.AdminDashboardDTO;
+import com.tienda.ecommerce.pago.model.EstadoPago;
 import com.tienda.ecommerce.pago.model.Pago;
 import com.tienda.ecommerce.pago.repository.PagoRepository;
 import com.tienda.ecommerce.productos.repository.ProductoRepository;
@@ -41,7 +42,7 @@ public class AdminService {
         long totalProductos = productoRepository.count();
         long totalPagos = todosPagos.size();
         double ingresosTotales = todosPagos.stream()
-                .filter(p -> "EXITOSO".equals(p.getEstado()))
+                .filter(p -> p.getEstado() == EstadoPago.EXITOSO)
                 .mapToDouble(Pago::getMontoTotal)
                 .sum();
 
@@ -55,7 +56,7 @@ public class AdminService {
                         p.getUsuario().getNombre(),
                         p.getUsuario().getEmail(),
                         p.getMontoTotal(),
-                        p.getEstado(),
+                        p.getEstado() != null ? p.getEstado().name() : null,
                         p.getFechaPago().format(fmt)
                 ))
                 .toList();
@@ -71,7 +72,7 @@ public class AdminService {
                             .filter(p -> p.getUsuario().getId().equals(u.getId()))
                             .toList();
                     double gastado = pagosUsuario.stream()
-                            .filter(p -> "EXITOSO".equals(p.getEstado()))
+                            .filter(p -> p.getEstado() == EstadoPago.EXITOSO)
                             .mapToDouble(Pago::getMontoTotal).sum();
                     return new AdminDashboardDTO.ClienteResumenDTO(
                             u.getId(), u.getNombre(), u.getEmail(),

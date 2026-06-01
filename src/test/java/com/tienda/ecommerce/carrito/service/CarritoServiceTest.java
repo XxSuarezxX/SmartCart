@@ -2,6 +2,7 @@ package com.tienda.ecommerce.carrito.service;
 
 import com.tienda.ecommerce.carrito.model.Carrito;
 import com.tienda.ecommerce.carrito.repository.CarritoRepository;
+import com.tienda.ecommerce.common.exception.RecursoNoEncontradoException;
 import com.tienda.ecommerce.productos.model.Producto;
 import com.tienda.ecommerce.productos.repository.ProductoRepository;
 import com.tienda.ecommerce.usuarios.model.Usuario;
@@ -112,7 +113,7 @@ class CarritoServiceTest {
         when(usuarioRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> carritoService.agregarProducto(99L, 10L, 1))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(RecursoNoEncontradoException.class)
                 .hasMessage("Usuario no encontrado");
 
         verify(carritoRepository, never()).save(any());
@@ -125,7 +126,7 @@ class CarritoServiceTest {
         when(productoRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> carritoService.agregarProducto(1L, 99L, 1))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(RecursoNoEncontradoException.class)
                 .hasMessage("Producto no encontrado");
 
         verify(carritoRepository, never()).save(any());
@@ -152,7 +153,7 @@ class CarritoServiceTest {
         when(carritoRepository.findById(404L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> carritoService.actualizarCantidad(404L, 1))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(RecursoNoEncontradoException.class)
                 .hasMessage("Item no encontrado en el carrito");
     }
 

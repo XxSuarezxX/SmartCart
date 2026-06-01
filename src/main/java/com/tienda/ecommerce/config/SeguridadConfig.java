@@ -53,15 +53,23 @@ public class SeguridadConfig {
                             "/mi-cuenta", "/recomendados", "/carrito",
                             "/producto/**", "/admin"
                         ).permitAll()
-                        // API pública
-                        .requestMatchers("/usuarios/**", "/api/auth/**").permitAll()
-                        .requestMatchers("/api/pagos/**").permitAll()
+                        // --- API PÚBLICA (sin sesión) ---
+                        .requestMatchers("/api/auth/login", "/api/auth/registro").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/productos/**").permitAll()
                         .requestMatchers("/api/interacciones/registrar").permitAll()
                         .requestMatchers("/api/interacciones/sugeridos/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/productos/cargar-csv").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/productos/**").permitAll()
-                        // API protegida
+                        // --- SOLO ADMIN ---
                         .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/auth/usuarios").hasAuthority("ADMIN")
+                        .requestMatchers("/api/interacciones/admin/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/pagos/todos").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/productos/cargar-csv").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/productos/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/productos/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/productos/**").hasAuthority("ADMIN")
+                        // --- REQUIERE SESIÓN (cualquier rol autenticado) ---
+                        .requestMatchers("/api/pagos/**").authenticated()
+                        .requestMatchers("/api/interacciones/**").authenticated()
                         .requestMatchers("/carrito/**").authenticated()
                         .anyRequest().authenticated())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

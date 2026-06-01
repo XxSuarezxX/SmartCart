@@ -2,7 +2,6 @@ package com.tienda.ecommerce.pago.controller;
 
 import java.util.List;
 
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,9 +13,9 @@ import com.tienda.ecommerce.pago.dto.PagoRequest;
 import com.tienda.ecommerce.pago.model.Pago;
 import com.tienda.ecommerce.pago.service.PagoService;
 
+// La política de CORS está centralizada en SeguridadConfig (lista blanca de orígenes).
 @RestController
 @RequestMapping("/api/pagos")
-@CrossOrigin(origins = "*") // Para que tu compañero del front no tenga líos de CORS
 public class PagoController {
 
     private final PagoService pagoService;
